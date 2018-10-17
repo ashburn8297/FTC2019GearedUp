@@ -101,5 +101,6 @@ repositories {
     flatDir {
         dirs rootProject.file('libs')
     }
+    jcenter()
 }
 apply from: 'build.release.gradle'
