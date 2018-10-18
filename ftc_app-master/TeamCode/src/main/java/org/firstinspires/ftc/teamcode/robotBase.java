@@ -47,9 +47,9 @@ public class robotBase
     public static final double  BASE_WIDTH = 16;
     public static final double  DRIVE_SPEED = 0.5;
     public static final double  TURN_SPEED = 0.5;
-    public static final double  ENCODER_TURN_COEFF = 1.25;
+    public static final double  ENCODER_TURN_COEFF = 1.6;
 
-    public static final int     LEAD_SCREW_TURNS = 30; // Turns in the ADM lead screw
+    public static final int     LEAD_SCREW_TURNS = 18; // Turns in the ADM lead screw
 
     public static final double  HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
     public static final double  P_TURN_COEFF            = 0.1;     // Larger is more responsive, but also less stable

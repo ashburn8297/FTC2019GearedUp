@@ -10,6 +10,8 @@ import net.frogbots.ftcopmodetunercommon.opmode.TunableOpMode;
 
 import org.firstinspires.ftc.teamcode.robotBase;
 
+import static android.os.SystemClock.sleep;
+
 @TeleOp(name = "Drive Base Test")
 //@Disabled
 public class driveBaseTesting extends TunableOpMode {
@@ -19,6 +21,7 @@ public class driveBaseTesting extends TunableOpMode {
 
     boolean aDown                       = false;
     boolean bDown                       = false;
+    boolean finished                    = true;
 
     @Override
     public void init() {
@@ -54,26 +57,25 @@ public class driveBaseTesting extends TunableOpMode {
             }
             if(aDown){
                 robot.ADM.setTargetPosition((int) robotBase.COUNTS_PER_MOTOR_REV * robot.LEAD_SCREW_TURNS);
-                robot.ADM.setPower(.5);
-                while(robot.ADM.isBusy()){
-                    telemetry.addData("Moving to Position", robot.ADM.getTargetPosition());
-                    telemetry.update();
-                }
-                robot.ADM.setPower(0);
-                aDown = false;
+                robot.ADM.setPower(1.0);
+                finished = false;
             }
+
 
             if(gamepad1.b){
                 bDown = true;
             }
             if(bDown){
                 robot.ADM.setTargetPosition(0);
-                robot.ADM.setPower(.5);
-                while(robot.ADM.isBusy()){
-                    telemetry.addData("Moving to Position", 0.0);
-                    telemetry.update();
-                }
+                robot.ADM.setPower(1.0);
+                finished = false;
+            }
+
+            if(finished = false){
+                if(robot.ADM.getTargetPosition() == robot.ADM.getCurrentPosition())
+                    finished = true;
                 robot.ADM.setPower(0);
+                aDown = false;
                 bDown = false;
             }
 

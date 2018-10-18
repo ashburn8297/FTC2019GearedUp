@@ -48,11 +48,15 @@ public class encoderDriveTesting extends TunableLinearOpMode {
         * The loop checks if the motors are busy, and the change from && to || should alleviate some turning inconsistencies.
          */
         //@TODO verify the accuracy of the methods. Change variables in robotBase.java if incorrect
-        robot.encoderDriveTurn(90, 4.0,   opModeIsActive(), runtime);
-        robot.encoderDriveTurn(-180, 4.0, opModeIsActive(), runtime);
-        robot.encoderDriveTurn(90, 4.0,   opModeIsActive(), runtime);
-        robot.encoderDriveStraight(12,3.0,    opModeIsActive(), runtime);
-        robot.encoderDriveStraight(-12, 3.0,  opModeIsActive(), runtime);
+        // negative is right, and negative is forward
+
+            robot.encoderDriveTurn(-90, 4.0, opModeIsActive(), runtime);
+            robot.encoderDriveStraight(-24, 2.0, opModeIsActive(), runtime);
+            robot.encoderDriveTurn(180, 4.0, opModeIsActive(), runtime);
+            robot.encoderDriveStraight(-48, 2.0, opModeIsActive(), runtime);
+            robot.encoderDriveTurn(180, 4.0, opModeIsActive(), runtime);
+            robot.encoderDriveStraight(24, 2.0, opModeIsActive(), runtime);
+            robot.encoderDriveTurn(90, 4.0, opModeIsActive(), runtime);
 
     }
 
