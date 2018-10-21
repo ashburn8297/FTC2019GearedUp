@@ -49,6 +49,7 @@ public class driveBaseTesting extends TunableOpMode {
             robot.leftDrive.setPower(gamepad1.left_stick_y);
             robot.rightDrive.setPower(gamepad1.right_stick_y);
             telemetry.addData("Lim Switch Status", robot.admLim.getState());
+            telemetry.addData("Encoder Position", robot.ADM.getCurrentPosition());
             telemetry.update();
 
             //@TODO check to see if the limit switch system works
@@ -58,7 +59,8 @@ public class driveBaseTesting extends TunableOpMode {
             if(aDown){
                 robot.ADM.setTargetPosition((int) robotBase.COUNTS_PER_MOTOR_REV * robot.LEAD_SCREW_TURNS);
                 robot.ADM.setPower(1.0);
-                finished = false;
+                //finished = false;
+                aDown=false;
             }
 
 
@@ -68,16 +70,17 @@ public class driveBaseTesting extends TunableOpMode {
             if(bDown){
                 robot.ADM.setTargetPosition(0);
                 robot.ADM.setPower(1.0);
-                finished = false;
+                //finished = false;
+                bDown=false;
             }
 
-            if(finished = false){
+            /*if(finished = false){
                 if(robot.ADM.getTargetPosition() == robot.ADM.getCurrentPosition())
                     finished = true;
                 robot.ADM.setPower(0);
                 aDown = false;
                 bDown = false;
-            }
+            }*/
 
     }
 

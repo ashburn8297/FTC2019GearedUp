@@ -11,6 +11,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+
 import java.util.ArrayList;
 
 import static android.os.SystemClock.sleep;
@@ -45,16 +49,17 @@ public class robotBase
     public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
     public static final double  BASE_WIDTH = 16;
-    public static final double  DRIVE_SPEED = 0.5;
-    public static final double  TURN_SPEED = 0.5;
+    public static final double  DRIVE_SPEED = 0.25;
+    public static final double  TURN_SPEED = 0.50;
     public static final double  ENCODER_TURN_COEFF = 1.6;
 
-    public static final int     LEAD_SCREW_TURNS = 18; // Turns in the ADM lead screw
 
-    public static final double  HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
-    public static final double  P_TURN_COEFF            = 0.1;     // Larger is more responsive, but also less stable
-    public static final double  P_DRIVE_COEFF           = 0.15;    // Larger is more responsive, but also less stable
+    public static final int     LEAD_SCREW_TURNS = 20; // Turns in the ADM lead screw
+
+    public static final double  HEADING_THRESHOLD  = 5 ;      // As tight as we can make it with an integer gyro
+
     /* Constructor */
+    
     public robotBase(){
 
     }
@@ -210,133 +215,27 @@ public class robotBase
     }
 
     //Drive by gyro
-    public void gyroDrive(double speed, double distance, double angle, boolean opMode) {
+    public void turnByGyro(double angle, double speed, boolean opMode){
+        double turnScale = Math.abs((angle-gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle)/angle);
+        while (opMode)  {
+            float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            turnScale = Math.abs((angle-gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle)/angle);
 
-        int     newLeftTarget;
-        int     newRightTarget;
-        int     moveCounts;
-        double  max;
-        double  error;
-        double  steer;
-        double  leftSpeed;
-        double  rightSpeed;
-
-        // Ensure that the opmode is still active
-        if (opMode) {
-
-            // Determine new target position, and pass to motor controller
-            moveCounts = (int)(distance * COUNTS_PER_INCH);
-            newLeftTarget = leftDrive.getCurrentPosition() + moveCounts;
-            newRightTarget = rightDrive.getCurrentPosition() + moveCounts;
-
-            // Set Target and Turn On RUN_TO_POSITION
-            leftDrive.setTargetPosition(newLeftTarget);
-            rightDrive.setTargetPosition(newRightTarget);
-
-            leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            // start motion.
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-            leftDrive.setPower(speed);
-            rightDrive.setPower(speed);
-
-            // keep looping while we are still active, and BOTH motors are running.
-            while (opMode &&
-                    (leftDrive.isBusy() && rightDrive.isBusy())) {
-
-                // adjust relative speed based on heading error.
-                error = getError(angle);
-                steer = getSteer(error, P_DRIVE_COEFF);
-
-                // if driving in reverse, the motor correction also needs to be reversed
-                if (distance < 0)
-                    steer *= -1.0;
-
-                leftSpeed = speed - steer;
-                rightSpeed = speed + steer;
-
-                // Normalize speeds if either one exceeds +/- 1.0;
-                max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
-                if (max > 1.0)
-                {
-                    leftSpeed /= max;
-                    rightSpeed /= max;
-                }
-
-                leftDrive.setPower(leftSpeed);
-                rightDrive.setPower(rightSpeed);
-
-
+            if(zAngle>=(angle-(HEADING_THRESHOLD/2)) && zAngle <= (angle+(HEADING_THRESHOLD/2))){
+                rightDrive.setPower(0);
+                leftDrive.setPower(0);
+                opMode = false;
+            }
+            else if(zAngle<angle){
+                rightDrive.setPower(turnScale*-speed);
+                leftDrive.setPower(turnScale*speed);
+            }
+            else{
+                rightDrive.setPower(turnScale*speed);
+                leftDrive.setPower(turnScale*-speed);
             }
 
-            // Stop all motion;
-            brake();
-
-            // Turn off RUN_TO_POSITION
-            leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
-    }
-    public void gyroTurn(double speed, double angle, boolean opMode) {
-        // keep looping while we are still active, and not on heading.
-        while (opMode && !onHeading(speed, angle, P_TURN_COEFF)) {
-
-        }
-    }
-    public void gyroHold(double speed, double angle, double holdTime, boolean opMode) {
-
-        ElapsedTime holdTimer = new ElapsedTime();
-
-        // keep looping while we have time remaining.
-        holdTimer.reset();
-        while (opMode && (holdTimer.time() < holdTime)) {
-            //Allow time for other processes to run.
-            onHeading(speed, angle, P_TURN_COEFF);
-        }
-
-        // Stop all motion;
-        brake();
-    }
-    public boolean onHeading(double speed, double angle, double PCoeff) {
-        double   error ;
-        double   steer ;
-        boolean  onTarget = false ;
-        double leftSpeed;
-        double rightSpeed;
-
-        // determine turn power based on +/- error
-        error = getError(angle);
-
-        if (Math.abs(error) <= HEADING_THRESHOLD) {
-            steer = 0.0;
-            leftSpeed  = 0.0;
-            rightSpeed = 0.0;
-            onTarget = true;
-        }
-        else {
-            steer = getSteer(error, PCoeff);
-            rightSpeed  = speed * steer;
-            leftSpeed   = -rightSpeed;
-        }
-
-        // Send desired speeds to motors.
-        leftDrive.setPower(leftSpeed);
-        rightDrive.setPower(rightSpeed);
-        return onTarget;
-    }
-    public double getError(double targetAngle) {
-
-        double robotError;
-
-        // calculate error in -179 to +180 range  (
-        robotError = targetAngle - gyro.getIntegratedZValue();
-        while (robotError > 180)  robotError -= 360;
-        while (robotError <= -180) robotError += 360;
-        return robotError;
-    }
-    public double getSteer(double error, double PCoeff) {
-        return Range.clip(error * PCoeff, -1, 1);
     }
 
     //Image Recognition

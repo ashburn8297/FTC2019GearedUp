@@ -38,7 +38,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@TeleOp(name="OptBTeleop", group="Iterative Opmode")
+@TeleOp(name="Previous Year", group="Iterative Opmode")
 //@Disabled
 public class PreviousYear extends OpMode
 {
