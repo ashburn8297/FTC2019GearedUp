@@ -31,7 +31,7 @@ public class driveBaseTesting extends TunableOpMode {
         telemetry.addData("Status", "HOMING");
         telemetry.update();
         while(robot.admLim.getState() != true){
-            robot.ADM.setPower(-.5); //negative is down
+            robot.ADM.setPower(-.38); //negative is down
         }
         //Zero encoder
         robot.ADM.setPower(0.0);
@@ -57,30 +57,23 @@ public class driveBaseTesting extends TunableOpMode {
                 aDown = true;
             }
             if(aDown){
-                robot.ADM.setTargetPosition((int) robotBase.COUNTS_PER_MOTOR_REV * robot.LEAD_SCREW_TURNS);
+                robot.ADM.setTargetPosition((int) robot.COUNTS_PER_MOTOR_REV * robot.LEAD_SCREW_TURNS);
                 robot.ADM.setPower(1.0);
                 //finished = false;
                 aDown=false;
             }
 
-
             if(gamepad1.b){
                 bDown = true;
             }
             if(bDown){
-                robot.ADM.setTargetPosition(0);
+                robot.ADM.setTargetPosition(100);
                 robot.ADM.setPower(1.0);
                 //finished = false;
                 bDown=false;
             }
 
-            /*if(finished = false){
-                if(robot.ADM.getTargetPosition() == robot.ADM.getCurrentPosition())
-                    finished = true;
-                robot.ADM.setPower(0);
-                aDown = false;
-                bDown = false;
-            }*/
+
 
     }
 

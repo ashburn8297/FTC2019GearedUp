@@ -59,7 +59,7 @@ public class robotBase
     public static final double  HEADING_THRESHOLD  = 5 ;      // As tight as we can make it with an integer gyro
 
     /* Constructor */
-    
+
     public robotBase(){
 
     }
@@ -216,7 +216,8 @@ public class robotBase
 
     //Drive by gyro
     public void turnByGyro(double angle, double speed, boolean opMode){
-        double turnScale = Math.abs((angle-gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle)/angle);
+        double turnScale;
+
         while (opMode)  {
             float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             turnScale = Math.abs((angle-gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle)/angle);
