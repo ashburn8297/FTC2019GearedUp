@@ -1,21 +1,22 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.disnodeteam.dogecv.CameraViewDisplay;
-import com.disnodeteam.dogecv.DogeCV;
-import com.disnodeteam.dogecv.detectors.roverrukus.SamplingOrderDetector;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static android.os.SystemClock.sleep;
 
@@ -41,7 +42,14 @@ public class robotBase
     /* local OpMode members. */
     HardwareMap hwMap                       = null;
     private ElapsedTime period              = new ElapsedTime();
-    private SamplingOrderDetector detector  = null;
+
+    private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
+    private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
+    private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+    private static final String VUFORIA_KEY = "AbEDH9P/////AAABmcFPgUDLz0tMh55QD8t9w6Bqxt3h/G+JEMdItgpjoR+S1FFRIeF/w2z5K7r/nUzRZKleksLHPglkfMKX0NltxxpVUpXqj+w6sGvedaNq449JZbEQxaYe4SU+3NNi0LBN879h9LZW9RxJFOMt7HfgssnBdg+3IsiwVKKYnovU+99oz3gJkcOtYhUS9ku3s0Wz2n6pOu3znT3bICiR0/480N63FS7d6Mk6sqN7mNyxVcRf8D5mqIMKVNGAjni9nSYensl8GAJWS1vYfZ5aQhXKs9BPM6mST5qf58Tg4xWoHltcyPp0x33tgQHBbcel0M9pYe/7ub1pmzvxeBqVgcztmzC7uHnosDO3/2MAMah8qijd";
+    private TFObjectDetector tfod;
+    private VuforiaLocalizer vuforia;
+
     //Items for encoders
     public static final double  COUNTS_PER_MOTOR_REV = 560.0;
     public static final double  DRIVE_GEAR_REDUCTION = .6;     // This is < 1.0 if geared UP
@@ -52,7 +60,6 @@ public class robotBase
     public static final double  DRIVE_SPEED = 0.25;
     public static final double  TURN_SPEED = 0.50;
     public static final double  ENCODER_TURN_COEFF = 1.6;
-
 
     public static final int     LEAD_SCREW_TURNS = 20; // Turns in the ADM lead screw
 
@@ -67,20 +74,6 @@ public class robotBase
     public void init(HardwareMap ahwMap) {
         // Save reference to Hardware map
         hwMap = ahwMap;
-
-        //Setup camera system
-        detector = new SamplingOrderDetector();
-        detector.init(hwMap.appContext, CameraViewDisplay.getInstance());
-        detector.useDefaults();
-        detector.downscale = 0.4;
-
-        // Optional Tuning
-        detector.areaScoringMethod = DogeCV.AreaScoringMethod.PERFECT_AREA; // Can also be PERFECT_AREA
-        detector.perfectAreaScorer.perfectArea = 10000; // if using PERFECT_AREA scoring
-
-        detector.maxAreaScorer.weight = 0.001;
-        detector.ratioScorer.weight = 15;
-        detector.ratioScorer.perfectRatio = 1.0;
 
         // Define and Initialize Motors
         leftDrive = hwMap.get(DcMotor.class, "left_drive");
@@ -106,6 +99,27 @@ public class robotBase
         //Initialize the limit switch
         admLim = hwMap.get(DigitalChannel.class, "ascent_descent_lim");
         gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
+    }
+    private void initVuforia() {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraDirection = CameraDirection.BACK;
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
+    }
+    private void initTfod() {
+        int tfodMonitorViewId = hwMap.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", hwMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
 
     //Drive by encoder
@@ -238,59 +252,65 @@ public class robotBase
 
         }
     }
-
-    //Image Recognition
-    public int getMineralPosition(ElapsedTime runtime, double secondOffset){
-
-        ArrayList<Integer> vals = new ArrayList<>();
+    public int track(ElapsedTime runtime){
+        initVuforia();
         int[] orderFreq = new int[4];
-        int max=0;
-        int maxIndex=0;
+        int maxIndex = 0;
+        int max = 0;
+        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+            initTfod();
+        }
+        if (tfod != null) {
+            tfod.activate();
+        }
 
-        detector.enable();
-        while(runtime.seconds()<(1.0+ secondOffset)){
-            if(runtime.seconds()>1.0) {
-                if (detector.getLastOrder().toString().equals("LEFT")) {
-                    vals.add(0);
-                } else if (detector.getLastOrder().toString().equals("CENTER")) {
-                    vals.add(1);
-                } else if (detector.getLastOrder().toString().equals("RIGHT")) {
-                    vals.add(2);
-                } else {
-                    vals.add(-1);
+        while ((runtime.seconds() < 4) && (runtime.seconds() > 1)) {
+            if (tfod != null) {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                if (updatedRecognitions != null) {
+                    if (updatedRecognitions.size() == 3) {
+                        int goldMineralX = -1;
+                        int silverMineral1X = -1;
+                        int silverMineral2X = -1;
+                        for (Recognition recognition : updatedRecognitions) {
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                goldMineralX = (int) recognition.getLeft();
+                            } else if (silverMineral1X == -1) {
+                                silverMineral1X = (int) recognition.getLeft();
+                            } else {
+                                silverMineral2X = (int) recognition.getLeft();
+                            }
+                        }
+
+                        //0 is left, 2 is right, 1 is center, 3 is unknown
+                        if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                            if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                                orderFreq[0]++;
+                            } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                                orderFreq[2]++;
+                            } else {
+                                orderFreq[1]++;
+                            }
+                        }
+                        else{
+                            orderFreq[3]++;
+                        }
+                    }
                 }
             }
-
         }
-
-        //After values are added to vals, count each occurrence
-        for(int a : vals){
-            switch(a) {
-                case -1:
-                    orderFreq[0]++;
-                    break;
-                case 0:
-                    orderFreq[1]++;
-                    break;
-                case 1:
-                    orderFreq[2]++;
-                    break;
-                case 2:
-                    orderFreq[3]++;
-                    break;
-
+        if (tfod != null) {
+            tfod.shutdown();
+        }
+        for(int i=0; i<orderFreq.length; i++) {
+            if (orderFreq[i] > max) {
+                maxIndex = i;
+                max = orderFreq[i];
             }
         }
-        //verify that the right result is returned.
-        for(int i=0; i<orderFreq.length; i++){
-            if(orderFreq[i]>max){
-                maxIndex=i;
-                max=orderFreq[i];
-
-            }
-        }
-        detector.disable();
         return maxIndex;
     }
-
 }
+

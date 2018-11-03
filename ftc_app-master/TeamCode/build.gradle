@@ -16,6 +16,4 @@ apply from: '../build.common.gradle'
 dependencies {
     //NOTE: this (0.22) is the correct version, the below screenshot is outdated
     compile 'org.openftc:ftc-opmode-tuner-common:0.22'
-    implementation project(':openCVLibrary3')
-    implementation project(':DogeCV')
 }
