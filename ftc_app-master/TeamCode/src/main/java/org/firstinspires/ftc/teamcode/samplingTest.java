@@ -47,7 +47,7 @@ public class samplingTest extends LinearOpMode {
         waitForStart();
         runtime.reset();
         int pos = robot.track(runtime);
-        telemetry.addData("Location:" , pos);
+        telemetry.addData("Location" , pos);
         telemetry.update();
         sleep(5000);
     }

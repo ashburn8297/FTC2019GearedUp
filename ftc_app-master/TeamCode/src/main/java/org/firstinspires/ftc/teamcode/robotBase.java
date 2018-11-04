@@ -26,8 +26,6 @@ Master Robot Config
 KNOWN ISSUES
 -This config is INCOMPLETE, must be updated for final bot
     -> Namely motor direction, naming, and ease of accessibility
--@TODO imu is unstable, change to I2C system
--@TODO update naming of motors in robotconfig file
 Pull this class for anything that has to do with the current robot config
  */
 public class robotBase
@@ -52,18 +50,15 @@ public class robotBase
 
     //Items for encoders
     public static final double  COUNTS_PER_MOTOR_REV = 560.0;
-    public static final double  DRIVE_GEAR_REDUCTION = .6;     // This is < 1.0 if geared UP
-    public static final double  WHEEL_DIAMETER_INCHES = 4.125;     // For figuring circumference
+    public static final double  DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
+    public static final double  WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
-    public static final double  BASE_WIDTH = 16;
     public static final double  DRIVE_SPEED = 0.25;
-    public static final double  TURN_SPEED = 0.50;
-    public static final double  ENCODER_TURN_COEFF = 1.6;
 
     public static final int     LEAD_SCREW_TURNS = 20; // Turns in the ADM lead screw
 
-    public static final double  HEADING_THRESHOLD  = 5 ;      // As tight as we can make it with an integer gyro
+    public static final double  HEADING_THRESHOLD  = 5 ;
 
     /* Constructor */
 
@@ -96,7 +91,6 @@ public class robotBase
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         ADM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        //Initialize the limit switch
         admLim = hwMap.get(DigitalChannel.class, "ascent_descent_lim");
         gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
     }
@@ -128,6 +122,7 @@ public class robotBase
         int newRightTarget;
 
         // Ensure that the opmode is still active
+        inches = -inches;
         if (opMode) {
 
             // Turn On RUN_TO_POSITION
@@ -151,62 +146,8 @@ public class robotBase
             // always end the motion as soon as possible.
             // However, if you require that BOTH motors have finished their moves before the robot continues
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
-            while (opMode &&
-                    (runtime.seconds() < timeoutS) &&
-                    (leftDrive.isBusy() || rightDrive.isBusy())) {
-            }
+            while (opMode && (runtime.seconds() < timeoutS) && (leftDrive.isBusy() || rightDrive.isBusy())) {
 
-            // Stop all motion;
-            brake();
-
-            leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-            // Turn off RUN_TO_POSITION
-            leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-            sleep(250);   // optional pause after each move
-        }
-
-    }
-    public void encoderDriveTurn(double turnDegrees, double timeoutS, boolean opMode, ElapsedTime runtime) {
-        //Possible update, see how many ticks for a full 360 turn
-        //Divide this by fraction of a circle to go (degrees to fraction)
-
-        double turningCircle = 3.1415 * BASE_WIDTH;
-        double circlePercent= turnDegrees / 360.0;
-        double targetDistance = circlePercent * turningCircle * ENCODER_TURN_COEFF;
-
-        int newLeftTarget;
-        int newRightTarget;
-        // Ensure that the opmode is still active
-        if (opMode) {
-
-            // Turn On RUN_TO_POSITION
-            leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            // Determine new target position, and pass to motor controller
-            newLeftTarget = leftDrive.getCurrentPosition() + (int) (targetDistance * COUNTS_PER_INCH);
-            newRightTarget = rightDrive.getCurrentPosition() + (int) (-targetDistance * COUNTS_PER_INCH);
-            leftDrive.setTargetPosition(newLeftTarget);
-            rightDrive.setTargetPosition(newRightTarget);
-
-            // reset the timeout time and start motion.
-            runtime.reset();
-            leftDrive.setPower(Math.abs(TURN_SPEED));
-            rightDrive.setPower(Math.abs(TURN_SPEED));
-
-            // keep looping while we are still active, and there is time left, and both motors are running.
-            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
-            // its target position, the motion will stop.  This is "safer" in the event that the robot will
-            // always end the motion as soon as possible.
-            // However, if you require that BOTH motors have finished their moves before the robot continues
-            // onto the next step, use (isBusy() || isBusy()) in the loop test.
-            while (opMode &&
-                    (runtime.seconds() < timeoutS) &&
-                    (leftDrive.isBusy() || rightDrive.isBusy())) {
             }
 
             // Stop all motion;
@@ -228,6 +169,23 @@ public class robotBase
         rightDrive.setPower(0);
     }
 
+    public static float getWheelPower(double in){
+        if(in > .02 ) {
+            in = 1 / (1 + Math.pow(2.7182, (-4 * ((2*in)-1))));
+        }
+        else if(in < -.02) {
+            in = -(1 / (1 + Math.pow(2.7182, (-4 * ((-2*in)-1)))));
+        }
+        else{
+            in = 0.0;
+        }
+
+        return (float)in;
+    }
+    public static float getWheelPowerLinear(double in){
+        return (float)in;
+    }
+
     //Drive by gyro
     public void turnByGyro(double angle, double speed, boolean opMode){
         double turnScale;
@@ -236,7 +194,7 @@ public class robotBase
             float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             turnScale = Math.abs((angle-gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle)/angle);
 
-            if(zAngle>=(angle-(HEADING_THRESHOLD/2)) && zAngle <= (angle+(HEADING_THRESHOLD/2))){
+            if((zAngle >= (angle - (HEADING_THRESHOLD / 2))) && (zAngle <= (angle + (HEADING_THRESHOLD / 2)))){
                 rightDrive.setPower(0);
                 leftDrive.setPower(0);
                 opMode = false;
@@ -252,9 +210,11 @@ public class robotBase
 
         }
     }
+
+    //Image recognition
     public int track(ElapsedTime runtime){
         initVuforia();
-        int[] orderFreq = new int[4];
+        int[] orderFreq = new int[3];
         int maxIndex = 0;
         int max = 0;
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
@@ -284,7 +244,7 @@ public class robotBase
                             }
                         }
 
-                        //0 is left, 2 is right, 1 is center, 3 is unknown
+                        //0 is left, 2 is right, 1 is center
                         if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
                             if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
                                 orderFreq[0]++;
@@ -293,9 +253,6 @@ public class robotBase
                             } else {
                                 orderFreq[1]++;
                             }
-                        }
-                        else{
-                            orderFreq[3]++;
                         }
                     }
                 }
