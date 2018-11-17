@@ -32,69 +32,65 @@ public class driveBaseTesting extends TunableOpMode {
     @Override
     public void init() {
         robot.init(hardwareMap);
+        //Home servo so that Lim can reach ADM
         robot.traverse.setPosition(robot.minTraverse);
         sleep(3000);
         //Home ADM
         while(robot.admLim.getState() == false) {
             robot.ADM.setPower(-.5);
         }
-        robot.ADM.setPower(0);
+        robot.ADM.setPower(.25);
         robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
+        robot.ADM.setTargetPosition(0);
     }
+
     @Override
     public void loop() {
 
-            leftPower = robot.getWheelPower(gamepad1.left_stick_y) - robot.getWheelPowerLinear(gamepad1.right_stick_x);
-            rightPower = robot.getWheelPower(gamepad1.left_stick_y) + robot.getWheelPowerLinear(gamepad1.right_stick_x);
+        leftPower = robot.getWheelPower(gamepad1.left_stick_y) - robot.getWheelPowerLinear(gamepad1.right_stick_x);
+        rightPower = robot.getWheelPower(gamepad1.left_stick_y) + robot.getWheelPowerLinear(gamepad1.right_stick_x);
 
-            robot.leftDrive.setPower(leftPower);
-            robot.rightDrive.setPower(rightPower);
+        robot.leftDrive.setPower(leftPower);
+        robot.rightDrive.setPower(rightPower);
 
+        yDown   = gamepad1.y;
+        aDown   = gamepad1.a;
+        xDown   = gamepad1.x;
+        bDown   = gamepad1.b;
+        rbDown  = gamepad1.right_bumper;
 
-            yDown = gamepad1.y;
-            aDown = gamepad1.a;
-            xDown = gamepad1.x;
-            bDown = gamepad1.b;
-            rbDown = gamepad1.right_bumper;
-
-            if(yDown){
-                robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV));
-                robot.ADM.setPower(.75);
-                if(robot.ADM.getCurrentPosition() > robot.ADM.getTargetPosition() - 350) {
-                    yDown = false;
-                    robot.ADM.setPower(0);
-                }
+        if(yDown){
+            robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV));
+            robot.ADM.setPower(.75);
+            if(robot.ADM.getCurrentPosition() > robot.ADM.getTargetPosition() - 350) {
+                yDown = false;
+                robot.ADM.setPower(0);
             }
+        }
 
-
-            if(aDown){
-                robot.ADM.setTargetPosition(0);
-                robot.ADM.setPower(.75);
-                if(robot.ADM.getCurrentPosition() < 350) {
-                    aDown = false;
-                    robot.ADM.setPower(0);
-                }
+        if(aDown){
+            robot.ADM.setTargetPosition(0);
+            robot.ADM.setPower(.75);
+            if(robot.ADM.getCurrentPosition() < 350) {
+                aDown = false;
+                robot.ADM.setPower(0);
             }
+        }
 
-            if(xDown){
-                robot.traverse.setPosition(robot.maxTraverse);
-                xDown = false;
-            }
+        if(xDown){
+            robot.traverse.setPosition(robot.maxTraverse);
+            xDown = false;
+        }
 
-            if(bDown){
-                robot.traverse.setPosition(robot.minTraverse);
-                bDown = false;
-            }
+        if(bDown){
+            robot.traverse.setPosition(robot.minTraverse);
+            bDown = false;
+        }
 
-            if(rbDown){
-                robot.traverse.setPosition(robot.midTraverse);
-                rbDown = false;
-            }
-
-
+        if(rbDown) {
+            robot.traverse.setPosition(robot.midTraverse);
+            rbDown = false;
+        }
     }
-
 }

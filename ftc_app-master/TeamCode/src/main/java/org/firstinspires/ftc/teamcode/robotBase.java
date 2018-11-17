@@ -56,7 +56,7 @@ public class robotBase
     //Items for encoders
     public static final double  COUNTS_PER_MOTOR_REV = 560.0;
     public static final double  DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
-    public static final double  WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+    public static final double  WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
     public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
     public static final double  DRIVE_SPEED = 0.25;
@@ -101,7 +101,7 @@ public class robotBase
 
         admLim = hwMap.get(DigitalChannel.class, "ascent_descent_lim");
 
-        traverse = hwMap.get(Servo.class, "ADM_servo"); //CRServo is continuous rotation servo
+        traverse = hwMap.get(Servo.class, "ADM_servo");
         traverse.setDirection(Servo.Direction.FORWARD);
 
         gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
@@ -199,6 +199,7 @@ public class robotBase
         }
     }
     public int track(ElapsedTime runtime){
+        //This code is adapted from an external sample "ConceptTensorFlowObjectDetection"
         initVuforia();
         int[] orderFreq = new int[3];
         int maxIndex = 0;
@@ -261,11 +262,15 @@ public class robotBase
     }
 
     public static float getWheelPower(double in){
-        if(in > .02) in = 1 / (1 + Math.pow(2.7182, (-4 * ((2 * in) - 1))));
-        else if(in < -.02) in = -(1 / (1 + Math.pow(2.7182, (-4 * ((-2 * in) - 1)))));
-        else in = 0.0;
-
-        return (float)in;
+        int neg = 1;
+        in *= 100;
+        if(in < 0){
+            neg = -1;
+        }
+        if(in <= 9) in = (in*0.0315)/100;
+        else if(in <= 39.537) in = ((0.021 * Math.pow(in-2,2)) + 0.063)/1000;
+        else in = ((0.75*in)/100);
+        return (float)in * neg;
     }
     public static float getWheelPowerLinear(double in){
         return (float)in;
