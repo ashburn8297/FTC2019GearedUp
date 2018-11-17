@@ -1,4 +1,4 @@
-/* Copyright (c) 2018 FIRST. All rights reserved.
+/* Copyright (c) 2017 FIRST. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted (subject to the limitations in the disclaimer below) provided that
@@ -29,25 +29,43 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous(name = "Sampling Test")
+@TeleOp(name = "Servo")
 //@Disabled
-public class samplingTest extends LinearOpMode {
+public class linearDriveBaseTesting extends LinearOpMode {
     robotBase robot = new robotBase();
-    private ElapsedTime runtime = new ElapsedTime();
+    static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
+    static final int    CYCLE_MS    =  7500;     // period of each cycle
+    static final double MAX_POS     =  1.0;     // Maximum rotational position
+    static final double MIN_POS     =  0.0;     // Minimum rotational position
+
+    // Define class members
+    double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
+    boolean rampUp = true;
+
 
     @Override
-    public void runOpMode(){
+    public void runOpMode() {
         robot.init(hardwareMap);
-
-        waitForStart();
-        runtime.reset();
-        int pos = robot.track(runtime);
-        telemetry.addData("Location" , pos);
+        // Wait for the start button
+        telemetry.addData(">", "Press Start to scan Servo." );
         telemetry.update();
-        sleep(5000);
+        waitForStart();
+        double min = .28;
+        robot.traverse.setPosition(min);
+        sleep(CYCLE_MS);
+        idle();
+
+        robot.traverse.setPosition(min + .53);
+        sleep(CYCLE_MS);
+        idle();
+
+        robot.traverse.setPosition(min + .26);
+        sleep(CYCLE_MS);
+        idle();
     }
 }

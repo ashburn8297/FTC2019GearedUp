@@ -2,12 +2,15 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -31,11 +34,13 @@ Pull this class for anything that has to do with the current robot config
 public class robotBase
 {
     /* Public OpMode members. */
-    public DcMotor leftDrive                = null;
-    public DcMotor rightDrive               = null;
-    public DcMotor ADM                      = null;
-    public DigitalChannel admLim            = null;
-    public ModernRoboticsI2cGyro gyro       = null;
+    public DcMotor leftDrive                = null; //left_drive
+    public DcMotor rightDrive               = null; //right_drive
+    public DcMotor ADM                      = null; //ascent_descent
+
+    public Servo traverse                   = null; //ADM_servo
+    public DigitalChannel admLim            = null; //ascent_descent_lim
+    public ModernRoboticsI2cGyro gyro       = null; //gyro
 
     /* local OpMode members. */
     HardwareMap hwMap                       = null;
@@ -56,10 +61,13 @@ public class robotBase
 
     public static final double  DRIVE_SPEED = 0.25;
 
-    public static final int     LEAD_SCREW_TURNS = 20; // Turns in the ADM lead screw
+    public static final int     LEAD_SCREW_TURNS = 17; // Turns in the ADM lead screw
 
     public static final double  HEADING_THRESHOLD  = 5 ;
 
+    public static final double maxTraverse = .79;
+    public static final double minTraverse = .28;
+    public static final double midTraverse = .54;
     /* Constructor */
 
     public robotBase(){
@@ -92,6 +100,10 @@ public class robotBase
         ADM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         admLim = hwMap.get(DigitalChannel.class, "ascent_descent_lim");
+
+        traverse = hwMap.get(Servo.class, "ADM_servo"); //CRServo is continuous rotation servo
+        traverse.setDirection(Servo.Direction.FORWARD);
+
         gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
     }
     private void initVuforia() {
@@ -102,6 +114,7 @@ public class robotBase
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
+
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
@@ -116,7 +129,7 @@ public class robotBase
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
 
-    //Drive by encoder
+    //Auto Methods
     public void encoderDriveStraight(double inches, double timeoutS, boolean opMode, ElapsedTime runtime) {
         int newLeftTarget;
         int newRightTarget;
@@ -164,54 +177,27 @@ public class robotBase
         }
 
     }
-    public void brake() {
-        leftDrive.setPower(0);
-        rightDrive.setPower(0);
-    }
-
-    public static float getWheelPower(double in){
-        if(in > .02 ) {
-            in = 1 / (1 + Math.pow(2.7182, (-4 * ((2*in)-1))));
-        }
-        else if(in < -.02) {
-            in = -(1 / (1 + Math.pow(2.7182, (-4 * ((-2*in)-1)))));
-        }
-        else{
-            in = 0.0;
-        }
-
-        return (float)in;
-    }
-    public static float getWheelPowerLinear(double in){
-        return (float)in;
-    }
-
-    //Drive by gyro
-    public void turnByGyro(double angle, double speed, boolean opMode){
+    public void turnByGyro(double angle, double speed, boolean opMode) {
         double turnScale;
 
-        while (opMode)  {
+        while (opMode) {
             float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-            turnScale = Math.abs((angle-gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle)/angle);
+            turnScale = Math.abs((angle - gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) / angle);
 
-            if((zAngle >= (angle - (HEADING_THRESHOLD / 2))) && (zAngle <= (angle + (HEADING_THRESHOLD / 2)))){
+            if ((zAngle >= (angle - (HEADING_THRESHOLD / 2))) && (zAngle <= (angle + (HEADING_THRESHOLD / 2)))) {
                 rightDrive.setPower(0);
                 leftDrive.setPower(0);
                 opMode = false;
-            }
-            else if(zAngle<angle){
-                rightDrive.setPower(turnScale*-speed);
-                leftDrive.setPower(turnScale*speed);
-            }
-            else{
-                rightDrive.setPower(turnScale*speed);
-                leftDrive.setPower(turnScale*-speed);
+            } else if (zAngle < angle) {
+                rightDrive.setPower(turnScale * -speed);
+                leftDrive.setPower(turnScale * speed);
+            } else {
+                rightDrive.setPower(turnScale * speed);
+                leftDrive.setPower(turnScale * -speed);
             }
 
         }
     }
-
-    //Image recognition
     public int track(ElapsedTime runtime){
         initVuforia();
         int[] orderFreq = new int[3];
@@ -269,5 +255,21 @@ public class robotBase
         }
         return maxIndex;
     }
+    public void brake() {
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+    }
+
+    public static float getWheelPower(double in){
+        if(in > .02) in = 1 / (1 + Math.pow(2.7182, (-4 * ((2 * in) - 1))));
+        else if(in < -.02) in = -(1 / (1 + Math.pow(2.7182, (-4 * ((-2 * in) - 1)))));
+        else in = 0.0;
+
+        return (float)in;
+    }
+    public static float getWheelPowerLinear(double in){
+        return (float)in;
+    }
+
 }
 
