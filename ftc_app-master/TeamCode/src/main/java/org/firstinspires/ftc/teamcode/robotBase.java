@@ -267,6 +267,7 @@ public class robotBase
         if(in < 0){
             neg = -1;
         }
+        in = Math.abs(in);
         if(in <= 9) in = (in*0.0315)/100;
         else if(in <= 39.537) in = ((0.021 * Math.pow(in-2,2)) + 0.063)/1000;
         else in = ((0.75*in)/100);

@@ -39,7 +39,7 @@ public class driveBaseTesting extends TunableOpMode {
         while(robot.admLim.getState() == false) {
             robot.ADM.setPower(-.5);
         }
-        robot.ADM.setPower(.25);
+        robot.ADM.setPower(.1);
         robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot.ADM.setTargetPosition(0);
@@ -48,8 +48,8 @@ public class driveBaseTesting extends TunableOpMode {
     @Override
     public void loop() {
 
-        leftPower = robot.getWheelPower(gamepad1.left_stick_y) - robot.getWheelPowerLinear(gamepad1.right_stick_x);
-        rightPower = robot.getWheelPower(gamepad1.left_stick_y) + robot.getWheelPowerLinear(gamepad1.right_stick_x);
+        leftPower = robot.getWheelPower(-gamepad1.left_stick_y);
+        rightPower = robot.getWheelPower(-gamepad1.right_stick_y);
 
         robot.leftDrive.setPower(leftPower);
         robot.rightDrive.setPower(rightPower);
@@ -63,7 +63,7 @@ public class driveBaseTesting extends TunableOpMode {
         if(yDown){
             robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV));
             robot.ADM.setPower(.75);
-            if(robot.ADM.getCurrentPosition() > robot.ADM.getTargetPosition() - 350) {
+            if(robot.ADM.getCurrentPosition() > robot.ADM.getTargetPosition() - 550) {
                 yDown = false;
                 robot.ADM.setPower(0);
             }
@@ -72,7 +72,7 @@ public class driveBaseTesting extends TunableOpMode {
         if(aDown){
             robot.ADM.setTargetPosition(0);
             robot.ADM.setPower(.75);
-            if(robot.ADM.getCurrentPosition() < 350) {
+            if(robot.ADM.getCurrentPosition() < 550) {
                 aDown = false;
                 robot.ADM.setPower(0);
             }
