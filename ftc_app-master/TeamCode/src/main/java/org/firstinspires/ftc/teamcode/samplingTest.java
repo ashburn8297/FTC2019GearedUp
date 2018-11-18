@@ -49,5 +49,7 @@ public class samplingTest extends LinearOpMode {
         telemetry.addData("Location" , pos);
         telemetry.update();
         sleep(5000);
+
+        robot.marker.setPosition(1.0);
     }
 }

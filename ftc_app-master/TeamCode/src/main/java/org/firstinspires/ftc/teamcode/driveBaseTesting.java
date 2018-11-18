@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import net.frogbots.ftcopmodetunercommon.opmode.TunableOpMode;
@@ -31,18 +32,19 @@ public class driveBaseTesting extends TunableOpMode {
     boolean xDown = false;
     boolean dpadUp = false;
 
+    @Override
+    public void init_loop(){
+
+    }
 
     @Override
     public void init() {
         robot.init(hardwareMap);
         robot.traverse.setPosition(robot.midTraverse);
         sleep(3500);
-
-        robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.ADM.setTargetPosition(250);
-
+        init_loop();
     }
+
     @Override
     public void loop() {
         if(direction == 1) {
@@ -65,27 +67,15 @@ public class driveBaseTesting extends TunableOpMode {
         dpadUp = gamepad1.dpad_up;
 
         if(yDown){
-            robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV));
+            robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest));
             robot.ADM.setPower(.75);
-            if(robot.ADM.getCurrentPosition() > robot.ADM.getTargetPosition() - 2000){
-                robot.ADM.setPower(.1);
-            }
-            if(robot.ADM.getCurrentPosition() > robot.ADM.getTargetPosition() - 350) {
-                yDown = false;
-                robot.ADM.setPower(0);
-            }
+            yDown = false;
         }
 
         if(aDown){
             robot.ADM.setTargetPosition(0);
             robot.ADM.setPower(.75);
-            if(robot.ADM.getCurrentPosition() < robot.ADM.getTargetPosition() + 2000){
-                robot.ADM.setPower(.1);
-            }
-            if(robot.ADM.getCurrentPosition() < 550) {
-                aDown = false;
-                robot.ADM.setPower(0);
-            }
+            aDown= false;
         }
 
         if(xDown){
