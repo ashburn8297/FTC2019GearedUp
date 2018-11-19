@@ -31,10 +31,19 @@ public class driveBaseTesting extends TunableOpMode {
     boolean rbDown = false;
     boolean xDown = false;
     boolean dpadUp = false;
+    boolean dpadLeft = false;
+    boolean dpadRight = false;
 
     @Override
     public void init_loop(){
-
+        /*
+        if(robot.hall.getState() == false){
+            robot.ADM.setPower(-.8);
+        }
+        else{
+            break;
+        }
+        */
     }
 
     @Override
@@ -43,6 +52,12 @@ public class driveBaseTesting extends TunableOpMode {
         robot.traverse.setPosition(robot.midTraverse);
         sleep(3500);
         init_loop();
+        robot.ADM.setPower(.1);
+
+        robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.ADM.setTargetPosition(100);
+        robot.ADM.setPower(0);
     }
 
     @Override
@@ -65,6 +80,8 @@ public class driveBaseTesting extends TunableOpMode {
         bDown = gamepad1.b;
         rbDown = gamepad1.right_bumper;
         dpadUp = gamepad1.dpad_up;
+        dpadLeft = gamepad1.dpad_left;
+        dpadRight = gamepad1.dpad_right;
 
         if(yDown){
             robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest));
@@ -97,6 +114,24 @@ public class driveBaseTesting extends TunableOpMode {
             direction *= -1;
             sleep(500);
             dpadUp = false;
+        }
+
+        if(dpadLeft){
+            double pos = robot.traverse.getPosition() + .01;
+            if(pos < robot.maxTraverse) {
+                robot.traverse.setPosition(pos);
+                sleep(250);
+            }
+            dpadLeft = false;
+        }
+
+        if(dpadRight){
+            double pos = robot.traverse.getPosition() - .01;
+            if(pos > robot.minTraverse) {
+                robot.traverse.setPosition(pos);
+                sleep(250);
+            }
+            dpadRight = false;
         }
     }
 }

@@ -2,18 +2,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.I2cController;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -66,7 +61,7 @@ public class robotBase
 
     public static final double  DRIVE_SPEED = 0.25;
 
-    public static final int     LEAD_SCREW_TURNS = 10; // Turns in the ADM lead screw
+    public static final int     LEAD_SCREW_TURNS = 20; // Turns in the ADM lead screw
 
     public static final double  HEADING_THRESHOLD  = 5 ;
 
@@ -282,15 +277,6 @@ public class robotBase
     }
     public static float getWheelPowerLinear(double in){
         return (float)in;
-    }
-
-    public boolean getHallState(double in){
-        if(in < 3.096){
-            return true;
-        }
-        else {
-            return false;
-        }
     }
 }
 
