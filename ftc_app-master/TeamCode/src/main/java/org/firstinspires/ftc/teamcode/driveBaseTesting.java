@@ -1,21 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import net.frogbots.ftcopmodetunercommon.opmode.TunableOpMode;
-
-import org.firstinspires.ftc.teamcode.robotBase;
 
 import static android.os.SystemClock.sleep;
 
 @TeleOp(name = "TeleOp Test")
 //@Disabled
-public class driveBaseTesting extends TunableOpMode {
+public class driveBaseTesting extends OpMode {
 
     robotBase robot                     = new robotBase();
     private ElapsedTime runtime         = new ElapsedTime();
@@ -24,6 +18,8 @@ public class driveBaseTesting extends TunableOpMode {
 
     double leftPower = 0.0;
     double rightPower = 0.0;
+
+    boolean foundState = false;
 
     boolean yDown = false;
     boolean aDown = false;
@@ -36,28 +32,33 @@ public class driveBaseTesting extends TunableOpMode {
 
     @Override
     public void init_loop(){
-        /*
-        if(robot.hall.getState() == false){
-            robot.ADM.setPower(-.8);
+
+        //If home isn't found
+        if((robot.hall.getState() == false) && (foundState == false)){
+            robot.ADM.setPower(-1);
         }
+        //If home is found, runs this only once
+        else if((robot.hall.getState() == true) && (foundState == false)){
+            foundState = true;
+            robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.ADM.setTargetPosition(100);
+        }
+        //While in transit
+        else if(robot.ADM.getTargetPosition() != robot.ADM.getCurrentPosition()){
+            robot.ADM.setPower(.1);
+        }
+        //If 100 is found, stop motion.
         else{
-            break;
+            robot.ADM.setPower(0);
         }
-        */
     }
 
     @Override
     public void init() {
         robot.init(hardwareMap);
         robot.traverse.setPosition(robot.midTraverse);
-        sleep(3500);
         init_loop();
-        robot.ADM.setPower(.1);
-
-        robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.ADM.setTargetPosition(100);
-        robot.ADM.setPower(0);
     }
 
     @Override
@@ -85,13 +86,13 @@ public class driveBaseTesting extends TunableOpMode {
 
         if(yDown){
             robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest));
-            robot.ADM.setPower(.75);
+            robot.ADM.setPower(1);
             yDown = false;
         }
 
         if(aDown){
-            robot.ADM.setTargetPosition(0);
-            robot.ADM.setPower(.75);
+            robot.ADM.setTargetPosition(100);
+            robot.ADM.setPower(1);
             aDown= false;
         }
 
@@ -117,7 +118,7 @@ public class driveBaseTesting extends TunableOpMode {
         }
 
         if(dpadLeft){
-            double pos = robot.traverse.getPosition() + .01;
+            double pos = robot.traverse.getPosition() + .02;
             if(pos < robot.maxTraverse) {
                 robot.traverse.setPosition(pos);
                 sleep(250);
@@ -126,7 +127,7 @@ public class driveBaseTesting extends TunableOpMode {
         }
 
         if(dpadRight){
-            double pos = robot.traverse.getPosition() - .01;
+            double pos = robot.traverse.getPosition() - .02;
             if(pos > robot.minTraverse) {
                 robot.traverse.setPosition(pos);
                 sleep(250);

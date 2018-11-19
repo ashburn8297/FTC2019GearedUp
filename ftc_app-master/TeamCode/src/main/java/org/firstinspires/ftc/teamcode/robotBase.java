@@ -57,17 +57,20 @@ public class robotBase
     public static final double  COUNTS_PER_MOTOR_REV_rev      = 560.0;
     public static final double  DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
     public static final double  WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
+
     public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV_rev * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
-    public static final double  DRIVE_SPEED = 0.25;
+    public static final double  DRIVE_SPEED = 0.18;
+    public static final double  HEADING_THRESHOLD  = 3;
 
     public static final int     LEAD_SCREW_TURNS = 20; // Turns in the ADM lead screw
-
-    public static final double  HEADING_THRESHOLD  = 5 ;
 
     public static final double maxTraverse = .79;
     public static final double minTraverse = .28;
     public static final double midTraverse = .54;
+
+    public static final double markerIn = .0;
+    public static final double markerOut = 1.0;
     /* Constructor */
 
     public robotBase(){
@@ -184,8 +187,7 @@ public class robotBase
 
         while (opMode) {
             float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-            turnScale = Math.abs((angle - gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) / angle);
-
+            turnScale = Math.abs((angle - zAngle)/angle);
             if ((zAngle >= (angle - (HEADING_THRESHOLD / 2))) && (zAngle <= (angle + (HEADING_THRESHOLD / 2)))) {
                 rightDrive.setPower(0);
                 leftDrive.setPower(0);
