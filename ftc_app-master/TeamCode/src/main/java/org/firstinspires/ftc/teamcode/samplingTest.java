@@ -30,24 +30,64 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import net.frogbots.ftcopmodetunercommon.opmode.TunableLinearOpMode;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Autonomous(name = "Sampling Test")
 //@Disabled
-public class samplingTest extends LinearOpMode {
+public class samplingTest extends TunableLinearOpMode {
     robotBase robot = new robotBase();
     private ElapsedTime runtime = new ElapsedTime();
 
+    boolean foundState = false;
+
     @Override
     public void runOpMode(){
+        //Initalization
         robot.init(hardwareMap);
+        robot.traverse.setPosition(robot.midTraverse);
 
+        //Somehow home ADM, and use this as a known checkpoint for teleOp
+        initialize();
+        robot.marker.setPosition(robot.markerIn);
+
+        //Prepare for start
         waitForStart();
         runtime.reset();
+
         int pos = robot.track(runtime);
         telemetry.addData("Location" , pos);
         telemetry.update();
-        sleep(5000);
+        idle();
+
+        robot.marker.setPosition(robot.markerOut);
+    }
+
+    public void initialize(){
+        //If home isn't found
+        if((robot.hall.getState() == false) && (foundState == false)){
+            robot.ADM.setPower(-1);
+            initialize();
+        }
+        //If home is found, runs this only once
+        else if((robot.hall.getState() == true) && (foundState == false)){
+            foundState = true;
+            robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.ADM.setTargetPosition(100);
+            initialize();
+        }
+        //While in transit
+        else if(robot.ADM.getTargetPosition() != robot.ADM.getCurrentPosition()){
+            robot.ADM.setPower(.1);
+            initialize();
+        }
+        //If 100 is found, stop motion.
+        else{
+            robot.ADM.setPower(0);
+        }
     }
 }

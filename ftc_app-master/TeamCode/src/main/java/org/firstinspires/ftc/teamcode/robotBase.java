@@ -2,7 +2,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -10,7 +9,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -39,7 +37,8 @@ public class robotBase
     public DcMotor ADM                      = null; //ascent_descent
 
     public Servo traverse                   = null; //ADM_servo
-    public DigitalChannel admLim            = null; //ascent_descent_lim
+    public Servo marker                     = null; //team_marker
+    public DigitalChannel hall              = null; //hall
     public ModernRoboticsI2cGyro gyro       = null; //gyro
 
     /* local OpMode members. */
@@ -54,20 +53,24 @@ public class robotBase
     private VuforiaLocalizer vuforia;
 
     //Items for encoders
-    public static final double  COUNTS_PER_MOTOR_REV = 560.0;
+    public static final double  COUNTS_PER_MOTOR_REV_neverest = 560.0;
+    public static final double  COUNTS_PER_MOTOR_REV_rev      = 560.0;
     public static final double  DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
-    public static final double  WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
-    public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    public static final double  WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
 
-    public static final double  DRIVE_SPEED = 0.25;
+    public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV_rev * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
-    public static final int     LEAD_SCREW_TURNS = 17; // Turns in the ADM lead screw
+    public static final double  DRIVE_SPEED = 0.18;
+    public static final double  HEADING_THRESHOLD  = 3;
 
-    public static final double  HEADING_THRESHOLD  = 5 ;
+    public static final int     LEAD_SCREW_TURNS = 20; // Turns in the ADM lead screw
 
     public static final double maxTraverse = .79;
     public static final double minTraverse = .28;
     public static final double midTraverse = .54;
+
+    public static final double markerIn = .0;
+    public static final double markerOut = 1.0;
     /* Constructor */
 
     public robotBase(){
@@ -99,10 +102,12 @@ public class robotBase
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         ADM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        admLim = hwMap.get(DigitalChannel.class, "ascent_descent_lim");
+        hall = hwMap.get(DigitalChannel.class, "hall");
 
-        traverse = hwMap.get(Servo.class, "ADM_servo"); //CRServo is continuous rotation servo
+        traverse = hwMap.get(Servo.class, "ADM_servo");
         traverse.setDirection(Servo.Direction.FORWARD);
+        marker = hwMap.get(Servo.class, "team_marker");
+        marker.setDirection(Servo.Direction.FORWARD);
 
         gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
     }
@@ -182,8 +187,7 @@ public class robotBase
 
         while (opMode) {
             float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-            turnScale = Math.abs((angle - gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle) / angle);
-
+            turnScale = Math.abs((angle - zAngle)/angle);
             if ((zAngle >= (angle - (HEADING_THRESHOLD / 2))) && (zAngle <= (angle + (HEADING_THRESHOLD / 2)))) {
                 rightDrive.setPower(0);
                 leftDrive.setPower(0);
@@ -199,6 +203,7 @@ public class robotBase
         }
     }
     public int track(ElapsedTime runtime){
+        //This code is adapted from an external sample "ConceptTensorFlowObjectDetection"
         initVuforia();
         int[] orderFreq = new int[3];
         int maxIndex = 0;
@@ -261,15 +266,19 @@ public class robotBase
     }
 
     public static float getWheelPower(double in){
-        if(in > .02) in = 1 / (1 + Math.pow(2.7182, (-4 * ((2 * in) - 1))));
-        else if(in < -.02) in = -(1 / (1 + Math.pow(2.7182, (-4 * ((-2 * in) - 1)))));
-        else in = 0.0;
-
-        return (float)in;
+        int neg = 1;
+        in *= 100;
+        if(in < 0){
+            neg = -1;
+        }
+        in = Math.abs(in);
+        if(in <= 9) in = (in*0.0315)/100;
+        else if(in <= 39.537) in = ((0.021 * Math.pow(in-2,2)) + 0.063)/1000;
+        else in = ((0.75*in)/100);
+        return (float)in * neg;
     }
     public static float getWheelPowerLinear(double in){
         return (float)in;
     }
-
 }
 
