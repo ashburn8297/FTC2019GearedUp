@@ -62,8 +62,15 @@ public class samplingTest extends TunableLinearOpMode {
         telemetry.addData("Location" , pos);
         telemetry.update();
         idle();
-
-        robot.marker.setPosition(robot.markerOut);
+        switch(pos){
+            case 0:
+                robot.
+                break;
+            case 1:
+                break;
+            case 2:
+                break
+        }
     }
 
     public void initialize(){
