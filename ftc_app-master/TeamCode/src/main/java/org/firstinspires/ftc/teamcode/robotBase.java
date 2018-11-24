@@ -39,7 +39,7 @@ public class robotBase
     public Servo traverse                   = null; //ADM_servo
     public Servo marker                     = null; //team_marker
     public DigitalChannel hall              = null; //hall
-    //public ModernRoboticsI2cGyro gyro       = null; //gyro
+    public ModernRoboticsI2cGyro gyro       = null; //gyro
 
     /* local OpMode members. */
     HardwareMap hwMap                       = null;
@@ -109,7 +109,7 @@ public class robotBase
         marker = hwMap.get(Servo.class, "team_marker");
         marker.setDirection(Servo.Direction.FORWARD);
 
-        //gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
+        gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
     }
     private void initVuforia() {
         /*
@@ -182,7 +182,7 @@ public class robotBase
         }
 
     }
-    /*
+
     public void turnByGyro(double angle, double speed, boolean opMode) {
         double turnScale;
 
@@ -203,7 +203,7 @@ public class robotBase
 
         }
     }
-    */
+
     public int track(ElapsedTime runtime){
         //This code is adapted from an external sample "ConceptTensorFlowObjectDetection"
         //initVuforia();

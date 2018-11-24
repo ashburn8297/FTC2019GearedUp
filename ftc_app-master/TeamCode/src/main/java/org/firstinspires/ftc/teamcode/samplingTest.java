@@ -51,7 +51,7 @@ public class samplingTest extends TunableLinearOpMode {
         robot.traverse.setPosition(robot.midTraverse);
 
         //Somehow home ADM, and use this as a known checkpoint for teleOp
-        initialize();
+        //initialize();
         robot.marker.setPosition(robot.markerIn);
 
         //Prepare for start
@@ -64,23 +64,25 @@ public class samplingTest extends TunableLinearOpMode {
         idle();
         switch(pos){
             case 0:
-                robot.
+                robot.turnByGyro(320, .25, opModeIsActive());
                 break;
             case 1:
+                robot.turnByGyro(0, .25, opModeIsActive());
                 break;
             case 2:
-                break
+                robot.turnByGyro(40, .25, opModeIsActive());
+                break;
         }
     }
 
     public void initialize(){
         //If home isn't found
-        if((robot.hall.getState() == false) && (foundState == false)){
+        if(robot.hall.getState()){
             robot.ADM.setPower(-1);
             initialize();
         }
         //If home is found, runs this only once
-        else if((robot.hall.getState() == true) && (foundState == false)){
+        else if(!robot.hall.getState()){
             foundState = true;
             robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
