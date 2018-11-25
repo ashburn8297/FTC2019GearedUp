@@ -206,7 +206,7 @@ public class robotBase
 
     public int track(ElapsedTime runtime){
         //This code is adapted from an external sample "ConceptTensorFlowObjectDetection"
-        //initVuforia();
+        initVuforia();
         int[] orderFreq = new int[3];
         int maxIndex = 0;
         int max = 0;

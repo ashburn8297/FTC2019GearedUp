@@ -44,6 +44,7 @@ public class samplingTest extends TunableLinearOpMode {
 
     boolean foundState = false;
 
+
     @Override
     public void runOpMode(){
         //Initalization
@@ -51,7 +52,7 @@ public class samplingTest extends TunableLinearOpMode {
         robot.traverse.setPosition(robot.midTraverse);
 
         //Somehow home ADM, and use this as a known checkpoint for teleOp
-        //initialize();
+        initialize();
         robot.marker.setPosition(robot.markerIn);
 
         //Prepare for start
@@ -64,13 +65,13 @@ public class samplingTest extends TunableLinearOpMode {
         idle();
         switch(pos){
             case 0:
-                robot.turnByGyro(320, .25, opModeIsActive());
+                robot.turnByGyro(320, .4, opModeIsActive());
                 break;
             case 1:
-                robot.turnByGyro(0, .25, opModeIsActive());
+                robot.turnByGyro(0, .4, opModeIsActive());
                 break;
             case 2:
-                robot.turnByGyro(40, .25, opModeIsActive());
+                robot.turnByGyro(40, .4, opModeIsActive());
                 break;
         }
     }
