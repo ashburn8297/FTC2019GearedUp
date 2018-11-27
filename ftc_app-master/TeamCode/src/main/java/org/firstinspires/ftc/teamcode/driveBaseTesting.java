@@ -5,6 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+
 import static android.os.SystemClock.sleep;
 
 @TeleOp(name = "TeleOp Test")
@@ -33,25 +37,6 @@ public class driveBaseTesting extends OpMode {
     @Override
     public void init_loop(){
 
-        //If home isn't found
-        if((robot.hall.getState() == false) && (foundState == false)){
-            robot.ADM.setPower(-1);
-        }
-        //If home is found, runs this only once
-        else if((robot.hall.getState() == true) && (foundState == false)){
-            foundState = true;
-            robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.ADM.setTargetPosition(100);
-        }
-        //While in transit
-        else if(robot.ADM.getTargetPosition() != robot.ADM.getCurrentPosition()){
-            robot.ADM.setPower(.1);
-        }
-        //If 100 is found, stop motion.
-        else{
-            robot.ADM.setPower(0);
-        }
     }
 
     @Override
@@ -134,5 +119,10 @@ public class driveBaseTesting extends OpMode {
             }
             dpadRight = false;
         }
+
+        float zAngle = robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        zAngle = zAngle % 360;
+        telemetry.addData("Current Angle", zAngle);
+        telemetry.update();
     }
 }

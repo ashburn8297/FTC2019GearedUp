@@ -45,16 +45,10 @@ public class robotBase
     HardwareMap hwMap                       = null;
     private ElapsedTime period              = new ElapsedTime();
 
-    public static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
-    public static final String LABEL_GOLD_MINERAL = "Gold Mineral";
-    public static final String LABEL_SILVER_MINERAL = "Silver Mineral";
-    public static final String VUFORIA_KEY = "AbEDH9P/////AAABmcFPgUDLz0tMh55QD8t9w6Bqxt3h/G+JEMdItgpjoR+S1FFRIeF/w2z5K7r/nUzRZKleksLHPglkfMKX0NltxxpVUpXqj+w6sGvedaNq449JZbEQxaYe4SU+3NNi0LBN879h9LZW9RxJFOMt7HfgssnBdg+3IsiwVKKYnovU+99oz3gJkcOtYhUS9ku3s0Wz2n6pOu3znT3bICiR0/480N63FS7d6Mk6sqN7mNyxVcRf8D5mqIMKVNGAjni9nSYensl8GAJWS1vYfZ5aQhXKs9BPM6mST5qf58Tg4xWoHltcyPp0x33tgQHBbcel0M9pYe/7ub1pmzvxeBqVgcztmzC7uHnosDO3/2MAMah8qijd";
-    public TFObjectDetector tfod;
-    public VuforiaLocalizer vuforia;
-
     //Items for encoders
     public static final double  COUNTS_PER_MOTOR_REV_neverest = 560.0;
     public static final double  COUNTS_PER_MOTOR_REV_rev      = 560.0;
+    public static final double  COUNTS_PER_MOTOR_REV_core     = 128.0;
     public static final double  DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
     public static final double  WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
 
@@ -111,34 +105,6 @@ public class robotBase
 
         gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
     }
-    /**
-     * Initialize the Vuforia localization engine.
-     */
-    public void initVuforia() {
-        /*
-         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
-         */
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = CameraDirection.BACK;
-
-        //  Instantiate the Vuforia engine
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-        // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
-    }
-
-    /**
-     * Initialize the Tensor Flow Object Detection engine.
-     */
-    public void initTfod() {
-        int tfodMonitorViewId = hwMap.appContext.getResources().getIdentifier(
-                "tfodMonitorViewId", "id", hwMap.appContext.getPackageName());
-        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
-    }
 
     //Auto Methods
     public void encoderDriveStraight(double inches, double timeoutS, boolean opMode, ElapsedTime runtime) {
@@ -191,74 +157,27 @@ public class robotBase
 
     public void turnByGyro(double angle, double speed, boolean opMode) {
         double turnScale;
+        angle = angle % 360;
 
         while (opMode) {
             float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-            turnScale = Math.abs((angle - zAngle)/angle);
+            zAngle = zAngle % 360;
+
             if ((zAngle >= (angle - (HEADING_THRESHOLD / 2))) && (zAngle <= (angle + (HEADING_THRESHOLD / 2)))) {
                 rightDrive.setPower(0);
                 leftDrive.setPower(0);
                 opMode = false;
             } else if (zAngle < angle) {
-                rightDrive.setPower(turnScale * -speed);
-                leftDrive.setPower(turnScale * speed);
+                rightDrive.setPower(-speed);
+                leftDrive.setPower(speed);
             } else {
-                rightDrive.setPower(turnScale * speed);
-                leftDrive.setPower(turnScale * -speed);
+                rightDrive.setPower(speed);
+                leftDrive.setPower(-speed);
             }
 
         }
     }
 
-    public int track(ElapsedTime runtime){
-        //This code is adapted from an external sample "ConceptTensorFlowObjectDetection"
-        int[] orderFreq = new int[3];
-        int maxIndex = 0;
-        int max = 0;
-
-        while ((runtime.seconds() < 4) && (runtime.seconds() > 0)) {
-            if (tfod != null) {
-                // getUpdatedRecognitions() will return null if no new information is available since
-                // the last time that call was made.
-                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                if (updatedRecognitions != null) {
-                    if (updatedRecognitions.size() == 3) {
-                        int goldMineralX = -1;
-                        int silverMineral1X = -1;
-                        int silverMineral2X = -1;
-                        for (Recognition recognition : updatedRecognitions) {
-                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldMineralX = (int) recognition.getLeft();
-                            } else if (silverMineral1X == -1) {
-                                silverMineral1X = (int) recognition.getLeft();
-                            } else {
-                                silverMineral2X = (int) recognition.getLeft();
-                            }
-                        }
-                        if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
-                            if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
-                                orderFreq[0]++;
-                            } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
-                                orderFreq[1]++;
-                            } else {
-                                orderFreq[2]++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (tfod != null) {
-            tfod.shutdown();
-        }
-        for(int i=0; i<orderFreq.length; i++) {
-            if (orderFreq[i] > max) {
-                maxIndex = i;
-                max = orderFreq[i];
-            }
-        }
-        return maxIndex;
-    }
     public void brake() {
         leftDrive.setPower(0);
         rightDrive.setPower(0);
