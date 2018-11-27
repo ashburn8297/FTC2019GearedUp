@@ -45,12 +45,12 @@ public class robotBase
     HardwareMap hwMap                       = null;
     private ElapsedTime period              = new ElapsedTime();
 
-    private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
-    private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
-    private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
-    private static final String VUFORIA_KEY = "AbEDH9P/////AAABmcFPgUDLz0tMh55QD8t9w6Bqxt3h/G+JEMdItgpjoR+S1FFRIeF/w2z5K7r/nUzRZKleksLHPglkfMKX0NltxxpVUpXqj+w6sGvedaNq449JZbEQxaYe4SU+3NNi0LBN879h9LZW9RxJFOMt7HfgssnBdg+3IsiwVKKYnovU+99oz3gJkcOtYhUS9ku3s0Wz2n6pOu3znT3bICiR0/480N63FS7d6Mk6sqN7mNyxVcRf8D5mqIMKVNGAjni9nSYensl8GAJWS1vYfZ5aQhXKs9BPM6mST5qf58Tg4xWoHltcyPp0x33tgQHBbcel0M9pYe/7ub1pmzvxeBqVgcztmzC7uHnosDO3/2MAMah8qijd";
-    private TFObjectDetector tfod;
-    private VuforiaLocalizer vuforia;
+    public static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
+    public static final String LABEL_GOLD_MINERAL = "Gold Mineral";
+    public static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+    public static final String VUFORIA_KEY = "AbEDH9P/////AAABmcFPgUDLz0tMh55QD8t9w6Bqxt3h/G+JEMdItgpjoR+S1FFRIeF/w2z5K7r/nUzRZKleksLHPglkfMKX0NltxxpVUpXqj+w6sGvedaNq449JZbEQxaYe4SU+3NNi0LBN879h9LZW9RxJFOMt7HfgssnBdg+3IsiwVKKYnovU+99oz3gJkcOtYhUS9ku3s0Wz2n6pOu3znT3bICiR0/480N63FS7d6Mk6sqN7mNyxVcRf8D5mqIMKVNGAjni9nSYensl8GAJWS1vYfZ5aQhXKs9BPM6mST5qf58Tg4xWoHltcyPp0x33tgQHBbcel0M9pYe/7ub1pmzvxeBqVgcztmzC7uHnosDO3/2MAMah8qijd";
+    public TFObjectDetector tfod;
+    public VuforiaLocalizer vuforia;
 
     //Items for encoders
     public static final double  COUNTS_PER_MOTOR_REV_neverest = 560.0;
@@ -111,7 +111,10 @@ public class robotBase
 
         gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
     }
-    private void initVuforia() {
+    /**
+     * Initialize the Vuforia localization engine.
+     */
+    public void initVuforia() {
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
          */
@@ -120,13 +123,16 @@ public class robotBase
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
 
-
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
         // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
     }
-    private void initTfod() {
+
+    /**
+     * Initialize the Tensor Flow Object Detection engine.
+     */
+    public void initTfod() {
         int tfodMonitorViewId = hwMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hwMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
@@ -206,18 +212,11 @@ public class robotBase
 
     public int track(ElapsedTime runtime){
         //This code is adapted from an external sample "ConceptTensorFlowObjectDetection"
-        initVuforia();
         int[] orderFreq = new int[3];
         int maxIndex = 0;
         int max = 0;
-        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
-            initTfod();
-        }
-        if (tfod != null) {
-            tfod.activate();
-        }
 
-        while ((runtime.seconds() < 4) && (runtime.seconds() > 1)) {
+        while ((runtime.seconds() < 4) && (runtime.seconds() > 0)) {
             if (tfod != null) {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
@@ -236,15 +235,13 @@ public class robotBase
                                 silverMineral2X = (int) recognition.getLeft();
                             }
                         }
-
-                        //0 is left, 2 is right, 1 is center
                         if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
                             if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
                                 orderFreq[0]++;
                             } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
-                                orderFreq[2]++;
-                            } else {
                                 orderFreq[1]++;
+                            } else {
+                                orderFreq[2]++;
                             }
                         }
                     }

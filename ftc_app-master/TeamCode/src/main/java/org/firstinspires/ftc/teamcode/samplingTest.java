@@ -34,7 +34,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import net.frogbots.ftcopmodetunercommon.opmode.TunableLinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 @Autonomous(name = "Sampling Test")
 //@Disabled
@@ -51,15 +54,27 @@ public class samplingTest extends TunableLinearOpMode {
         robot.init(hardwareMap);
         //robot.traverse.setPosition(robot.midTraverse);
         //Somehow home ADM, and use this as a known checkpoint for teleOp
-        //initialize();
+        robot.traverse.setPosition(robot.midTraverse);
+        initialize();
         //robot.marker.setPosition(robot.markerIn);
-        
 
-        //Prepare for start
+        robot.initVuforia();
+
+        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+            robot.initTfod();
+        } else {
+            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+        }
+
+        /** Wait for the game to begin */
+        telemetry.addData(">", "Press Play to start tracking");
+        telemetry.update();
+
         waitForStart();
         runtime.reset();
 
         int pos = robot.track(runtime);
+        sleep(3000);
         telemetry.addData("Location" , pos);
         telemetry.update();
         idle();
