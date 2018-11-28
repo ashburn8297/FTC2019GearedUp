@@ -29,10 +29,14 @@ public class driveBaseTesting extends OpMode {
     boolean aDown = false;
     boolean bDown = false;
     boolean rbDown = false;
+    boolean lbDown = false;
     boolean xDown = false;
     boolean dpadUp = false;
     boolean dpadLeft = false;
     boolean dpadRight = false;
+    boolean yDown2 = false;
+    boolean xDown2 = false;
+    boolean aDown2 = false;
 
     @Override
     public void init_loop(){
@@ -42,8 +46,6 @@ public class driveBaseTesting extends OpMode {
     @Override
     public void init() {
         robot.init(hardwareMap);
-        robot.traverse.setPosition(robot.midTraverse);
-        init_loop();
     }
 
     @Override
@@ -65,6 +67,7 @@ public class driveBaseTesting extends OpMode {
         xDown = gamepad1.x;
         bDown = gamepad1.b;
         rbDown = gamepad1.right_bumper;
+        lbDown = gamepad1.left_bumper;
         dpadUp = gamepad1.dpad_up;
         dpadLeft = gamepad1.dpad_left;
         dpadRight = gamepad1.dpad_right;
@@ -77,7 +80,7 @@ public class driveBaseTesting extends OpMode {
 
         if(aDown){
             robot.ADM.setTargetPosition(100);
-            robot.ADM.setPower(1);
+            robot.ADM.setPower(-1);
             aDown= false;
         }
 
@@ -92,8 +95,13 @@ public class driveBaseTesting extends OpMode {
         }
 
         if(rbDown){
-            robot.traverse.setPosition(robot.midTraverse);
+            robot.traverse.setPosition(robot.midTraverseRight);
             rbDown = false;
+        }
+
+        if(lbDown){
+            robot.traverse.setPosition(robot.midTraverseLeft);
+            lbDown = false;
         }
 
         if(dpadUp) {
@@ -119,10 +127,5 @@ public class driveBaseTesting extends OpMode {
             }
             dpadRight = false;
         }
-
-        float zAngle = robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-        zAngle = zAngle % 360;
-        telemetry.addData("Current Angle", zAngle);
-        telemetry.update();
     }
 }

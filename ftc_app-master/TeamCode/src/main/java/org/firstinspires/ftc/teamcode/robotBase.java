@@ -35,9 +35,12 @@ public class robotBase
     public DcMotor leftDrive                = null; //left_drive
     public DcMotor rightDrive               = null; //right_drive
     public DcMotor ADM                      = null; //ascent_descent
+    public DcMotor inVertical               = null; //intake_veritcal
+    public DcMotor inHorizontal             = null; //intake_horizontal
 
     public Servo traverse                   = null; //ADM_servo
     public Servo marker                     = null; //team_marker
+    public Servo intakePitch                = null; //intake_pitch
     public DigitalChannel hall              = null; //hall
     public ModernRoboticsI2cGyro gyro       = null; //gyro
 
@@ -48,23 +51,29 @@ public class robotBase
     //Items for encoders
     public static final double  COUNTS_PER_MOTOR_REV_neverest = 560.0;
     public static final double  COUNTS_PER_MOTOR_REV_rev      = 560.0;
-    public static final double  COUNTS_PER_MOTOR_REV_core     = 128.0;
+    public static final double  COUNTS_PER_MOTOR_REV_core     = 288.0;
     public static final double  DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
     public static final double  WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
 
     public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV_rev * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
     public static final double  DRIVE_SPEED = 0.18;
-    public static final double  HEADING_THRESHOLD  = 3;
+    public static final double  HEADING_THRESHOLD  = 2;
 
     public static final int     LEAD_SCREW_TURNS = 20; // Turns in the ADM lead screw
 
-    public static final double maxTraverse = .79;
+    public static final double maxTraverse = .78;
     public static final double minTraverse = .28;
-    public static final double midTraverse = .54;
+    public static final double midTraverseRight = .54;
+    public static final double midTraverseLeft = .50;
 
-    public static final double markerIn = .0;
-    public static final double markerOut = 1.0;
+    public static final double markerIn = .19;
+    public static final double markerMid = .3;
+    public static final double markerOut = .8;
+
+    public static final int armLow = 10;
+    public static final int armMid = 50;
+    public static final int armHigh = 100;
     /* Constructor */
 
     public robotBase(){
@@ -79,22 +88,30 @@ public class robotBase
         leftDrive = hwMap.get(DcMotor.class, "left_drive");
         rightDrive = hwMap.get(DcMotor.class, "right_drive");
         ADM = hwMap.get(DcMotor.class, "ascent_descent"); //Control Ascent Descent Module (ADM)
+        inHorizontal = hwMap.get(DcMotor.class, "intake_horizontal");
+        inVertical = hwMap.get(DcMotor.class, "intake_vertical");
 
         // Initialize direction of motors
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
         ADM.setDirection(DcMotor.Direction.FORWARD);
+        inHorizontal.setDirection(DcMotor.Direction.FORWARD);
+        inVertical.setDirection(DcMotor.Direction.FORWARD);
 
         // Set all motors to zero power
         leftDrive.setPower(0);
         rightDrive.setPower(0);
         ADM.setPower(0);
+        inHorizontal.setPower(0);
+        inVertical.setPower(0);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
         leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         ADM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        inVertical.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        inHorizontal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         hall = hwMap.get(DigitalChannel.class, "hall");
 
@@ -102,6 +119,8 @@ public class robotBase
         traverse.setDirection(Servo.Direction.FORWARD);
         marker = hwMap.get(Servo.class, "team_marker");
         marker.setDirection(Servo.Direction.FORWARD);
+        intakePitch = hwMap.get(Servo.class, "intake_pitch");
+        intakePitch.setDirection(Servo.Direction.FORWARD);
 
         gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
     }
@@ -112,7 +131,6 @@ public class robotBase
         int newRightTarget;
 
         // Ensure that the opmode is still active
-        inches = -inches;
         if (opMode) {
 
             // Turn On RUN_TO_POSITION
@@ -157,11 +175,9 @@ public class robotBase
 
     public void turnByGyro(double angle, double speed, boolean opMode) {
         double turnScale;
-        angle = angle % 360;
 
         while (opMode) {
             float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-            zAngle = zAngle % 360;
 
             if ((zAngle >= (angle - (HEADING_THRESHOLD / 2))) && (zAngle <= (angle + (HEADING_THRESHOLD / 2)))) {
                 rightDrive.setPower(0);
@@ -198,5 +214,6 @@ public class robotBase
     public static float getWheelPowerLinear(double in){
         return (float)in;
     }
+
 }
 
