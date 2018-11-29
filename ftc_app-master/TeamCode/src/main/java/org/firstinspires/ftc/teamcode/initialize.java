@@ -37,7 +37,7 @@ public class initialize extends LinearOpMode {
             foundState = true;
             robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.ADM.setTargetPosition(100);
+            robot.ADM.setTargetPosition(0);
             initialize();
         }
         //While in transit
@@ -45,7 +45,7 @@ public class initialize extends LinearOpMode {
             robot.ADM.setPower(.1);
             initialize();
         }
-        //If 100 is found, stop motion.
+        //If 0 is found, stop motion.
         else{
             robot.ADM.setPower(0);
         }

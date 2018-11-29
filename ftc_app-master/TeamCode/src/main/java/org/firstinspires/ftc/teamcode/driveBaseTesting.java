@@ -71,6 +71,8 @@ public class driveBaseTesting extends OpMode {
         dpadUp = gamepad1.dpad_up;
         dpadLeft = gamepad1.dpad_left;
         dpadRight = gamepad1.dpad_right;
+        yDown2 = gamepad2.y;
+        aDown2 = gamepad2.a;
 
         if(yDown){
             robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest));
@@ -127,5 +129,19 @@ public class driveBaseTesting extends OpMode {
             }
             dpadRight = false;
         }
+
+        if(yDown2){
+            robot.inVertical.setTargetPosition(-70);
+            robot.inVertical.setPower(-.25);
+            yDown2 = false;
+        }
+
+        if(aDown2){
+            robot.inVertical.setTargetPosition(-5);
+            robot.inVertical.setPower(.25);
+            aDown2 = false;
+        }
+        telemetry.addData("Pos", robot.inVertical.getCurrentPosition());
+        telemetry.update();
     }
 }

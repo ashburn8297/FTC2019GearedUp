@@ -62,8 +62,8 @@ public class robotBase
 
     public static final int     LEAD_SCREW_TURNS = 19; // Turns in the ADM lead screw
 
-    public static final double maxTraverse = .78;
-    public static final double minTraverse = .28;
+    public static final double maxTraverse = .75;
+    public static final double minTraverse = .31;
     public static final double midTraverseRight = .54;
     public static final double midTraverseLeft = .50;
 
@@ -177,8 +177,8 @@ public class robotBase
 
 
     public void turnByGyro(double targetAngle, double speed, boolean opMode) {
-        float initAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-        float totalDist = (float)(Math.abs(initAngle)-Math.abs(targetAngle));
+        //float initAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        //float totalDist = (float)(Math.abs(initAngle)-Math.abs(targetAngle));
         while(opMode){
             float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 
@@ -188,22 +188,10 @@ public class robotBase
                 opMode = false;
             }
             else if(zAngle<targetAngle){
-                if(((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist)>.4){
-                    speed*=((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist);
-                }
-                else if(((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist)<.4){
-                    speed*=(Math.abs(initAngle)-Math.abs(zAngle))/totalDist;
-                }
                 rightDrive.setPower(-speed);
                 leftDrive.setPower(speed);
             }
             else if(zAngle>targetAngle){
-                if(((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist)>.4){
-                    speed*=((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist);
-                }
-                else if(((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist)<.4){
-                    speed*=(Math.abs(initAngle)-Math.abs(zAngle))/totalDist;
-                }
                 rightDrive.setPower(speed);
                 leftDrive.setPower(-speed);
             }

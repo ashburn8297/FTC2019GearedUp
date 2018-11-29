@@ -64,18 +64,11 @@ public class cubeAuto extends LinearOpMode {
         robot.inVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        //robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest));
-        //robot.ADM.setPower(1);
-        //while(robot.ADM.getCurrentPosition() != robot.ADM.getTargetPosition())
-        //    idle();
+        robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest));
+        robot.ADM.setPower(1);
+        sleep(4500);
+        robot.traverse.setPosition(robot.minTraverse);
 
-        robot.ADM.setPower(0);
-        //robot.traverse.setPosition(robot.maxTraverse);
-
-        robot.inVertical.setTargetPosition(50);
-        robot.inVertical.setPower(.5);
-
-robot.intakePitch.setPosition(.5);
         sleep(1000);
 
         //Vuforia command
@@ -124,18 +117,14 @@ robot.intakePitch.setPosition(.5);
             tfod.shutdown();
         }
 
-
         telemetry.addData("Location", maxIndex);
         telemetry.update();
 
-        //Drop Arm Down
-        robot.inVertical.setTargetPosition(0);
-        robot.inVertical.setPower(.5);
-
-        robot.encoderDriveStraight(12, 2.0, opModeIsActive(), runtime);
+        robot.encoderDriveStraight(10, 2.0, opModeIsActive(), runtime);
 
         if(maxIndex == 0) {
             robot.turnByGyro(30, .2, opModeIsActive());
+            robot.encoderDriveStraight(30, 2.0, opModeIsActive(), runtime);
         }
         if(maxIndex == 1) {
             //Do Not Turn
