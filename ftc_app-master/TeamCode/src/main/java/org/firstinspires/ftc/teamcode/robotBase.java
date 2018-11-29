@@ -58,9 +58,9 @@ public class robotBase
     public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV_rev * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
     public static final double  DRIVE_SPEED = 0.18;
-    public static final double  HEADING_THRESHOLD  = 2;
+    public static final double  HEADING_THRESHOLD  = 4;
 
-    public static final int     LEAD_SCREW_TURNS = 20; // Turns in the ADM lead screw
+    public static final int     LEAD_SCREW_TURNS = 19; // Turns in the ADM lead screw
 
     public static final double maxTraverse = .78;
     public static final double minTraverse = .28;
@@ -110,7 +110,9 @@ public class robotBase
         leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         ADM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        inVertical.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        inVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         inHorizontal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         hall = hwMap.get(DigitalChannel.class, "hall");
@@ -173,24 +175,38 @@ public class robotBase
 
     }
 
-    public void turnByGyro(double angle, double speed, boolean opMode) {
-        double turnScale;
 
-        while (opMode) {
+    public void turnByGyro(double targetAngle, double speed, boolean opMode) {
+        float initAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        float totalDist = (float)(Math.abs(initAngle)-Math.abs(targetAngle));
+        while(opMode){
             float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 
-            if ((zAngle >= (angle - (HEADING_THRESHOLD / 2))) && (zAngle <= (angle + (HEADING_THRESHOLD / 2)))) {
+            if ((zAngle >= (targetAngle - (HEADING_THRESHOLD / 2))) && (zAngle <= (targetAngle + (HEADING_THRESHOLD / 2)))) {
                 rightDrive.setPower(0);
                 leftDrive.setPower(0);
                 opMode = false;
-            } else if (zAngle < angle) {
+            }
+            else if(zAngle<targetAngle){
+                if(((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist)>.4){
+                    speed*=((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist);
+                }
+                else if(((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist)<.4){
+                    speed*=(Math.abs(initAngle)-Math.abs(zAngle))/totalDist;
+                }
                 rightDrive.setPower(-speed);
                 leftDrive.setPower(speed);
-            } else {
+            }
+            else if(zAngle>targetAngle){
+                if(((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist)>.4){
+                    speed*=((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist);
+                }
+                else if(((Math.abs(targetAngle)-Math.abs(zAngle))/totalDist)<.4){
+                    speed*=(Math.abs(initAngle)-Math.abs(zAngle))/totalDist;
+                }
                 rightDrive.setPower(speed);
                 leftDrive.setPower(-speed);
             }
-
         }
     }
 

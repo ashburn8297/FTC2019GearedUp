@@ -1,27 +1,21 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import net.frogbots.ftcopmodetunercommon.opmode.TunableLinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.List;
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 
-@Autonomous(name = "CubeAuto")
-//@Disabled
-public class cubeAuto extends LinearOpMode {
+@Autonomous(name = "BallAuto")
+@Disabled
+public class ballAuto extends LinearOpMode {
     robotBase robot = new robotBase();
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -41,7 +35,7 @@ public class cubeAuto extends LinearOpMode {
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
         // first.
         robot.init(hardwareMap);
-        //tensor flow IR start
+        //tensor flow image recognition magic
         initVuforia();
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
@@ -59,26 +53,6 @@ public class cubeAuto extends LinearOpMode {
         runtime.reset();
         telemetry.update();
 
-        robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.inVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        //robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest));
-        //robot.ADM.setPower(1);
-        //while(robot.ADM.getCurrentPosition() != robot.ADM.getTargetPosition())
-        //    idle();
-
-        robot.ADM.setPower(0);
-        //robot.traverse.setPosition(robot.maxTraverse);
-
-        robot.inVertical.setTargetPosition(50);
-        robot.inVertical.setPower(.5);
-
-robot.intakePitch.setPosition(.5);
-        sleep(1000);
-
-        //Vuforia command
         if (tfod != null) {
             tfod.activate();
         }
@@ -123,28 +97,12 @@ robot.intakePitch.setPosition(.5);
         if (tfod != null) {
             tfod.shutdown();
         }
-
-
+        //end tensor flow magic
         telemetry.addData("Location", maxIndex);
         telemetry.update();
 
-        //Drop Arm Down
-        robot.inVertical.setTargetPosition(0);
-        robot.inVertical.setPower(.5);
 
-        robot.encoderDriveStraight(12, 2.0, opModeIsActive(), runtime);
-
-        if(maxIndex == 0) {
-            robot.turnByGyro(30, .2, opModeIsActive());
-        }
-        if(maxIndex == 1) {
-            //Do Not Turn
-        }
-        if(maxIndex == 2) {
-
-        }
-
-        stop();
+        requestOpModeStop();
     }
     /**
      * Initialize the Vuforia localization engine.

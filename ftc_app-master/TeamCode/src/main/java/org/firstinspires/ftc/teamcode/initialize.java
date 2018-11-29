@@ -22,11 +22,12 @@ public class initialize extends LinearOpMode {
         robot.inVertical.setTargetPosition(50);
 
         waitForStart();
-        requestOpModeStop();
+        while(opModeIsActive())
+            idle();
     }
 
     public void initialize(){
-        //If home isn't found
+         //If home isn't found
         if(robot.hall.getState()){
             robot.ADM.setPower(-1);
             initialize();
