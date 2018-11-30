@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 import static android.os.SystemClock.sleep;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 
 @TeleOp(name = "TeleOp Test")
 //@Disabled
@@ -23,21 +24,6 @@ public class driveBaseTesting extends OpMode {
     double leftPower = 0.0;
     double rightPower = 0.0;
 
-    boolean foundState = false;
-
-    boolean yDown = false;
-    boolean aDown = false;
-    boolean bDown = false;
-    boolean rbDown = false;
-    boolean lbDown = false;
-    boolean xDown = false;
-    boolean dpadUp = false;
-    boolean dpadLeft = false;
-    boolean dpadRight = false;
-    boolean yDown2 = false;
-    boolean xDown2 = false;
-    boolean aDown2 = false;
-
     @Override
     public void init_loop(){
 
@@ -46,6 +32,10 @@ public class driveBaseTesting extends OpMode {
     @Override
     public void init() {
         robot.init(hardwareMap);
+        robot.inVertical.setMode(STOP_AND_RESET_ENCODER);
+        robot.inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.inHorizontal.setMode(STOP_AND_RESET_ENCODER);
+        robot.inHorizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     @Override
@@ -62,86 +52,98 @@ public class driveBaseTesting extends OpMode {
         robot.rightDrive.setPower((rightPower * direction));
 
 
-        yDown = gamepad1.y;
-        aDown = gamepad1.a;
-        xDown = gamepad1.x;
-        bDown = gamepad1.b;
-        rbDown = gamepad1.right_bumper;
-        lbDown = gamepad1.left_bumper;
-        dpadUp = gamepad1.dpad_up;
-        dpadLeft = gamepad1.dpad_left;
-        dpadRight = gamepad1.dpad_right;
-        yDown2 = gamepad2.y;
-        aDown2 = gamepad2.a;
-
-        if(yDown){
-            robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest));
+        if(gamepad1.y){
+            robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest)-300);
             robot.ADM.setPower(1);
-            yDown = false;
         }
 
-        if(aDown){
-            robot.ADM.setTargetPosition(100);
+        if(gamepad1.a){
+            robot.ADM.setTargetPosition(300);
             robot.ADM.setPower(-1);
-            aDown= false;
         }
 
-        if(xDown){
+        if(gamepad1.x){
             robot.traverse.setPosition(robot.maxTraverse);
-            xDown = false;
         }
 
-        if(bDown){
+        if(gamepad1.b){
             robot.traverse.setPosition(robot.minTraverse);
-            bDown = false;
         }
 
-        if(rbDown){
+        if(gamepad1.right_bumper){
             robot.traverse.setPosition(robot.midTraverseRight);
-            rbDown = false;
         }
 
-        if(lbDown){
+        if(gamepad1.left_bumper){
             robot.traverse.setPosition(robot.midTraverseLeft);
-            lbDown = false;
         }
 
-        if(dpadUp) {
+        if(gamepad1.dpad_up) {
             direction *= -1;
             sleep(500);
-            dpadUp = false;
         }
 
-        if(dpadLeft){
+        if(gamepad1.dpad_left){
             double pos = robot.traverse.getPosition() + .02;
             if(pos < robot.maxTraverse) {
                 robot.traverse.setPosition(pos);
                 sleep(250);
             }
-            dpadLeft = false;
         }
 
-        if(dpadRight){
+        if(gamepad1.dpad_right){
             double pos = robot.traverse.getPosition() - .02;
             if(pos > robot.minTraverse) {
                 robot.traverse.setPosition(pos);
                 sleep(250);
             }
-            dpadRight = false;
         }
 
-        if(yDown2){
-            robot.inVertical.setTargetPosition(-70);
-            robot.inVertical.setPower(-.25);
-            yDown2 = false;
+        if(gamepad2.y){
+            robot.inVertical.setTargetPosition(robot.armHigh);
+            robot.inVertical.setPower(-.75);
+            robot.inVertical2.setPower(-.75);
+        }
+        if(gamepad2.a){
+            robot.inVertical.setTargetPosition(robot.armLow);
+            robot.inVertical.setPower(-.03);
+            robot.inVertical2.setPower(-.03);
+        }
+        if(robot.inVertical.getTargetPosition() == robot.inVertical.getCurrentPosition())
+            robot.inVertical2.setPower(0);
+
+        if(gamepad2.left_bumper) {
+            robot.inHorizontal.setTargetPosition(robot.armIn);
+            robot.inHorizontal.setPower(1);
+        }
+        if(gamepad2.right_bumper) {
+            robot.inHorizontal.setTargetPosition(robot.armOut);
+            robot.inHorizontal.setPower(-1);
+        }
+        if(gamepad2.left_trigger > 0)
+            robot.intake.setPower(-1.0);
+        else if(gamepad2.right_trigger > 0)
+            robot.intake.setPower(1.0);
+        else
+            robot.intake.setPower(0.0);
+
+        if(gamepad2.dpad_up) {
+            robot.intakePitch.setPosition(robot.boxUp);
+            sleep(500);
+        }
+        if(gamepad2.dpad_left) {
+            robot.intakePitch.setPosition(robot.boxFlat);
+            sleep(500);
+        }
+        if(gamepad2.dpad_right) {
+            robot.intakePitch.setPosition(robot.boxDump);
+            sleep(500);
         }
 
-        if(aDown2){
-            robot.inVertical.setTargetPosition(-5);
-            robot.inVertical.setPower(.25);
-            aDown2 = false;
-        }
+
         telemetry.addData("Pos", robot.inVertical.getCurrentPosition());
+        telemetry.addData("Out", robot.inHorizontal.getCurrentPosition());
+        telemetry.addData("Servo", robot.intakePitch.getPosition());
         telemetry.update();
     }
 }

@@ -64,10 +64,17 @@ public class cubeAuto extends LinearOpMode {
         robot.inVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+        //Raise ADM, and drop from lander
         robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest));
         robot.ADM.setPower(1);
+
         sleep(4500);
+        //Move ADM to the side, move marker, keep box raised, raise arm
         robot.traverse.setPosition(robot.minTraverse);
+        robot.marker.setPosition(robot.markerMid);
+        robot.intakePitch.setPosition(robot.boxUp);
+        robot.inVertical.setTargetPosition(robot.armHigh);
+        robot.inVertical.setPower(-1);
 
         sleep(1000);
 
@@ -120,11 +127,18 @@ public class cubeAuto extends LinearOpMode {
         telemetry.addData("Location", maxIndex);
         telemetry.update();
 
+        //Lower the arm, flatten the box, begin the intake
+        robot.inVertical.setTargetPosition(robot.armLow);
+        robot.inVertical.setPower(-.03);
+        robot.intakePitch.setPosition(robot.boxFlat);
+        robot.intake.setPower(1.0);
+
         robot.encoderDriveStraight(10, 2.0, opModeIsActive(), runtime);
 
         if(maxIndex == 0) {
             robot.turnByGyro(30, .2, opModeIsActive());
             robot.encoderDriveStraight(30, 2.0, opModeIsActive(), runtime);
+            robot.intake.setPower(0.0);
         }
         if(maxIndex == 1) {
             //Do Not Turn

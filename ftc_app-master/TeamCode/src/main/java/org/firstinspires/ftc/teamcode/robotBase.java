@@ -2,7 +2,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -36,11 +38,13 @@ public class robotBase
     public DcMotor rightDrive               = null; //right_drive
     public DcMotor ADM                      = null; //ascent_descent
     public DcMotor inVertical               = null; //intake_veritcal
+    public DcMotor inVertical2              = null; //intake_veritcal2
     public DcMotor inHorizontal             = null; //intake_horizontal
 
     public Servo traverse                   = null; //ADM_servo
     public Servo marker                     = null; //team_marker
     public Servo intakePitch                = null; //intake_pitch
+    public CRServo intake                   = null; //intake
     public DigitalChannel hall              = null; //hall
     public ModernRoboticsI2cGyro gyro       = null; //gyro
 
@@ -62,8 +66,8 @@ public class robotBase
 
     public static final int     LEAD_SCREW_TURNS = 19; // Turns in the ADM lead screw
 
-    public static final double maxTraverse = .75;
-    public static final double minTraverse = .31;
+    public static final double maxTraverse = .78;
+    public static final double minTraverse = .36;
     public static final double midTraverseRight = .54;
     public static final double midTraverseLeft = .50;
 
@@ -71,9 +75,17 @@ public class robotBase
     public static final double markerMid = .3;
     public static final double markerOut = .8;
 
-    public static final int armLow = 10;
-    public static final int armMid = 50;
-    public static final int armHigh = 100;
+    public static final int armLow = -10;
+    public static final int armMid = -35;
+    public static final int armHigh = -70;
+
+    public static final int armIn = -20;
+    public static final int armOut = -1700;
+
+    public static final double boxFlat = 0.54;
+    public static final double boxUp = 0.0;
+    public static final double boxDump = 1.0;
+
     /* Constructor */
 
     public robotBase(){
@@ -90,6 +102,7 @@ public class robotBase
         ADM = hwMap.get(DcMotor.class, "ascent_descent"); //Control Ascent Descent Module (ADM)
         inHorizontal = hwMap.get(DcMotor.class, "intake_horizontal");
         inVertical = hwMap.get(DcMotor.class, "intake_vertical");
+        inVertical2 = hwMap.get(DcMotor.class, "intake_vertical2");
 
         // Initialize direction of motors
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -97,6 +110,7 @@ public class robotBase
         ADM.setDirection(DcMotor.Direction.FORWARD);
         inHorizontal.setDirection(DcMotor.Direction.FORWARD);
         inVertical.setDirection(DcMotor.Direction.FORWARD);
+        inVertical2.setDirection(DcMotor.Direction.REVERSE);
 
         // Set all motors to zero power
         leftDrive.setPower(0);
@@ -104,6 +118,7 @@ public class robotBase
         ADM.setPower(0);
         inHorizontal.setPower(0);
         inVertical.setPower(0);
+        inVertical2.setPower(0);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
@@ -111,14 +126,16 @@ public class robotBase
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         ADM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        inVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        inVertical.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        inVertical2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         inHorizontal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         hall = hwMap.get(DigitalChannel.class, "hall");
 
         traverse = hwMap.get(Servo.class, "ADM_servo");
         traverse.setDirection(Servo.Direction.FORWARD);
+        intake = hwMap.get(CRServo.class, "intake");
+        intake.setDirection(CRServo.Direction.FORWARD);
         marker = hwMap.get(Servo.class, "team_marker");
         marker.setDirection(Servo.Direction.FORWARD);
         intakePitch = hwMap.get(Servo.class, "intake_pitch");
