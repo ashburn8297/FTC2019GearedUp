@@ -16,14 +16,11 @@ public class initialize extends LinearOpMode {
         robot.init(hardwareMap);
 
         robot.traverse.setPosition(robot.midTraverseLeft);
-        robot.inVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.inVertical.setTargetPosition(50);
 
         waitForStart();
         while(opModeIsActive()) {
             if(robot.hall.getState()){
-                robot.ADM.setPower(-1);
+                robot.ADM.setPower(-.5);
                 idle();
             }
             //If home is found, runs this only once
@@ -36,7 +33,7 @@ public class initialize extends LinearOpMode {
             }
             //While in transit
             else if(robot.ADM.getTargetPosition() != robot.ADM.getCurrentPosition()){
-                robot.ADM.setPower(.1);
+                robot.ADM.setPower(.3);
                 idle();
             }
             //If 0 is found, stop motion.

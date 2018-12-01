@@ -38,7 +38,6 @@ public class robotBase
     public DcMotor rightDrive               = null; //right_drive
     public DcMotor ADM                      = null; //ascent_descent
     public DcMotor inVertical               = null; //intake_veritcal
-    public DcMotor inVertical2              = null; //intake_veritcal2
     public DcMotor inHorizontal             = null; //intake_horizontal
 
     public Servo traverse                   = null; //ADM_servo
@@ -53,9 +52,8 @@ public class robotBase
     private ElapsedTime period              = new ElapsedTime();
 
     //Items for encoders
-    public static final double  COUNTS_PER_MOTOR_REV_neverest = 560.0;
-    public static final double  COUNTS_PER_MOTOR_REV_rev      = 560.0;
     public static final double  COUNTS_PER_MOTOR_REV_core     = 288.0;
+    public static final double  COUNTS_PER_MOTOR_REV_rev      = 560.0;
     public static final double  DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
     public static final double  WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
 
@@ -64,7 +62,7 @@ public class robotBase
     public static final double  DRIVE_SPEED = 0.18;
     public static final double  HEADING_THRESHOLD  = 4;
 
-    public static final int     LEAD_SCREW_TURNS = 19; // Turns in the ADM lead screw
+    public static final double     LEAD_SCREW_TURNS = 12.5; // Turns in the ADM lead screw
 
     public static final double maxTraverse = .78;
     public static final double minTraverse = .36;
@@ -75,15 +73,11 @@ public class robotBase
     public static final double markerMid = .3;
     public static final double markerOut = .8;
 
-    public static final int armLow = -10;
-    public static final int armMid = -35;
-    public static final int armHigh = -70;
+    public static final int armLow = 0;
+    public static final int armHigh = -125;
 
-    public static final int armIn = -20;
-    public static final int armOut = -1700;
-
-    public static final double boxFlat = 0.54;
-    public static final double boxUp = 0.0;
+    public static final double boxFlat = 0.60;
+    public static final double boxStowed = 0.05;
     public static final double boxDump = 1.0;
 
     /* Constructor */
@@ -102,7 +96,6 @@ public class robotBase
         ADM = hwMap.get(DcMotor.class, "ascent_descent"); //Control Ascent Descent Module (ADM)
         inHorizontal = hwMap.get(DcMotor.class, "intake_horizontal");
         inVertical = hwMap.get(DcMotor.class, "intake_vertical");
-        inVertical2 = hwMap.get(DcMotor.class, "intake_vertical2");
 
         // Initialize direction of motors
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -110,7 +103,6 @@ public class robotBase
         ADM.setDirection(DcMotor.Direction.FORWARD);
         inHorizontal.setDirection(DcMotor.Direction.FORWARD);
         inVertical.setDirection(DcMotor.Direction.FORWARD);
-        inVertical2.setDirection(DcMotor.Direction.REVERSE);
 
         // Set all motors to zero power
         leftDrive.setPower(0);
@@ -118,7 +110,6 @@ public class robotBase
         ADM.setPower(0);
         inHorizontal.setPower(0);
         inVertical.setPower(0);
-        inVertical2.setPower(0);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
@@ -127,7 +118,6 @@ public class robotBase
         ADM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         inVertical.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        inVertical2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         inHorizontal.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         hall = hwMap.get(DigitalChannel.class, "hall");

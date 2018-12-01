@@ -5,17 +5,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-
 import static android.os.SystemClock.sleep;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 
-@TeleOp(name = "TeleOp Test")
-//@Disabled
-public class driveBaseTesting extends OpMode {
-
+@TeleOp(name = "TeleOp")
+//Disabled
+public class teleOp extends OpMode {
     robotBase robot                     = new robotBase();
     private ElapsedTime runtime         = new ElapsedTime();
 
@@ -25,17 +20,13 @@ public class driveBaseTesting extends OpMode {
     double rightPower = 0.0;
 
     @Override
-    public void init_loop(){
-
-    }
-
-    @Override
     public void init() {
         robot.init(hardwareMap);
         robot.inVertical.setMode(STOP_AND_RESET_ENCODER);
         robot.inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.inHorizontal.setMode(STOP_AND_RESET_ENCODER);
-        robot.inHorizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.ADM.setMode(STOP_AND_RESET_ENCODER);
+        robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
     }
 
     @Override
@@ -53,13 +44,13 @@ public class driveBaseTesting extends OpMode {
 
 
         if(gamepad1.y){
-            robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest)-300);
-            robot.ADM.setPower(1);
+            robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev)-300);
+            robot.ADM.setPower(.5);
         }
 
         if(gamepad1.a){
             robot.ADM.setTargetPosition(300);
-            robot.ADM.setPower(-1);
+            robot.ADM.setPower(-.5);
         }
 
         if(gamepad1.x){
@@ -99,38 +90,39 @@ public class driveBaseTesting extends OpMode {
             }
         }
 
+        //Run to encoder position, then kill power
         if(gamepad2.y){
             robot.inVertical.setTargetPosition(robot.armHigh);
-            robot.inVertical.setPower(-.75);
-            robot.inVertical2.setPower(-.75);
+            robot.intakePitch.setPosition(robot.boxDump);
+            robot.inVertical.setPower(-.1);
         }
+        if(robot.inVertical.getCurrentPosition() < -80 && robot.inVertical.getTargetPosition() < -100) {
+            robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        }
+
+        //if a is pressed, set position to low and set power accordingly
         if(gamepad2.a){
             robot.inVertical.setTargetPosition(robot.armLow);
-            robot.inVertical.setPower(-.03);
-            robot.inVertical2.setPower(-.03);
+            robot.intakePitch.setPosition(robot.boxStowed);
+            robot.inVertical.setPower(.05);
         }
-        if(robot.inVertical.getTargetPosition() == robot.inVertical.getCurrentPosition())
-            robot.inVertical2.setPower(0);
+        if(robot.inVertical.getCurrentPosition() > -80 && robot.inVertical.getTargetPosition() > -10) {
+                robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        }
 
-        if(gamepad2.left_bumper) {
-            robot.inHorizontal.setTargetPosition(robot.armIn);
-            robot.inHorizontal.setPower(1);
-        }
-        if(gamepad2.right_bumper) {
-            robot.inHorizontal.setTargetPosition(robot.armOut);
-            robot.inHorizontal.setPower(-1);
-        }
-        if(gamepad2.left_trigger > 0)
+        //Set motor power to stick input, directionally scaled
+        robot.inHorizontal.setPower(gamepad2.right_stick_y);
+
+        //Control Intake
+        if(gamepad2.right_trigger > 0)
             robot.intake.setPower(-1.0);
-        else if(gamepad2.right_trigger > 0)
+        else if(gamepad2.left_trigger > 0)
             robot.intake.setPower(1.0);
         else
             robot.intake.setPower(0.0);
 
-        if(gamepad2.dpad_up) {
-            robot.intakePitch.setPosition(robot.boxUp);
-            sleep(500);
-        }
         if(gamepad2.dpad_left) {
             robot.intakePitch.setPosition(robot.boxFlat);
             sleep(500);
@@ -143,7 +135,9 @@ public class driveBaseTesting extends OpMode {
 
         telemetry.addData("Pos", robot.inVertical.getCurrentPosition());
         telemetry.addData("Out", robot.inHorizontal.getCurrentPosition());
-        telemetry.addData("Servo", robot.intakePitch.getPosition());
+        telemetry.addData("Marker", robot.marker.getPosition());
+        telemetry.addData("Encoder REV", robot.ADM.getCurrentPosition());
+        telemetry.addData("Servo Pitch", robot.intakePitch.getPosition());
         telemetry.update();
     }
 }

@@ -65,16 +65,20 @@ public class cubeAuto extends LinearOpMode {
         robot.inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //Raise ADM, and drop from lander
-        robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_neverest));
-        robot.ADM.setPower(1);
+        robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev)-300);
+        robot.ADM.setPower(.5);
+        telemetry.addData("Lift Encoder Value", robot.ADM.getCurrentPosition());
 
-        sleep(4500);
-        //Move ADM to the side, move marker, keep box raised, raise arm
-        robot.traverse.setPosition(robot.minTraverse);
+        sleep(4000);
+        //Move ADM to the side, move marker, keep box raised
+        robot.traverse.setPosition(robot.minTraverse + .04);
         robot.marker.setPosition(robot.markerMid);
-        robot.intakePitch.setPosition(robot.boxUp);
+        sleep(500);
+        robot.intakePitch.setPosition(robot.boxFlat);
+
+        //Arm
         robot.inVertical.setTargetPosition(robot.armHigh);
-        robot.inVertical.setPower(-1);
+        robot.inVertical.setPower(-.1);
 
         sleep(1000);
 
@@ -127,12 +131,15 @@ public class cubeAuto extends LinearOpMode {
         telemetry.addData("Location", maxIndex);
         telemetry.update();
 
-        //Lower the arm, flatten the box, begin the intake
-        robot.inVertical.setTargetPosition(robot.armLow);
-        robot.inVertical.setPower(-.03);
-        robot.intakePitch.setPosition(robot.boxFlat);
-        robot.intake.setPower(1.0);
+        //Set arm position
 
+        robot.marker.setPosition(robot.markerIn);
+        robot.intakePitch.setPosition(robot.boxFlat);
+        robot.intake.setPower(-1.0);
+        sleep(1500);
+
+        //Get up to there working before drive testing
+        /*
         robot.encoderDriveStraight(10, 2.0, opModeIsActive(), runtime);
 
         if(maxIndex == 0) {
@@ -146,6 +153,7 @@ public class cubeAuto extends LinearOpMode {
         if(maxIndex == 2) {
 
         }
+        */
 
         stop();
     }
