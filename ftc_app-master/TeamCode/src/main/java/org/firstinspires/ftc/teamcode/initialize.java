@@ -15,7 +15,7 @@ public class initialize extends LinearOpMode {
     public void runOpMode() {
         robot.init(hardwareMap);
 
-        robot.traverse.setPosition(robot.midTraverseLeft);
+        robot.traverse.setPosition(robot.midTraverseRight);
 
         waitForStart();
         while(opModeIsActive()) {

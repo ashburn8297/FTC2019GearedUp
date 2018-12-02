@@ -60,14 +60,14 @@ public class robotBase
     public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV_rev * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
     public static final double  DRIVE_SPEED = 0.18;
-    public static final double  HEADING_THRESHOLD  = 4;
+    public static final double  HEADING_THRESHOLD  = 2;
 
-    public static final double     LEAD_SCREW_TURNS = 12.5; // Turns in the ADM lead screw
+    public static final double  LEAD_SCREW_TURNS = 12.5; // Turns in the ADM lead screw
 
-    public static final double maxTraverse = .78;
-    public static final double minTraverse = .36;
-    public static final double midTraverseRight = .54;
-    public static final double midTraverseLeft = .50;
+    public static final double maxTraverse = .73;
+    public static final double minTraverse = .32;
+    public static final double midTraverseRight = .58;
+    public static final double midTraverseLeft = .47;
 
     public static final double markerIn = .19;
     public static final double markerMid = .3;
@@ -76,8 +76,9 @@ public class robotBase
     public static final int armLow = 0;
     public static final int armHigh = -125;
 
+    public static final double boxIntake = .52;
     public static final double boxFlat = 0.60;
-    public static final double boxStowed = 0.05;
+    public static final double boxStowed = 0.1;
     public static final double boxDump = 1.0;
 
     /* Constructor */
@@ -222,8 +223,29 @@ public class robotBase
         else in = ((0.75*in)/100);
         return (float)in * neg;
     }
+
     public static float getWheelPowerLinear(double in){
         return (float)in;
+    }
+
+    public void admMove(int targetPos){
+        ElapsedTime runtime=new ElapsedTime();
+        int curPos = ADM.getCurrentPosition();
+        boolean stall=false;
+        while(ADM.getCurrentPosition()!=targetPos && !stall){
+            if(targetPos < ADM.getCurrentPosition())
+                ADM.setPower(-.5);
+            else if(targetPos > ADM.getCurrentPosition())
+                ADM.setPower(.5);
+            if(Math.abs(ADM.getCurrentPosition()-curPos)<5){
+                stall=true;
+            }
+        }
+        ADM.setPower(0);
+
+
+
+
     }
 
 }

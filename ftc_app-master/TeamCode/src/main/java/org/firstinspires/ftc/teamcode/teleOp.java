@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static android.os.SystemClock.sleep;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 
 @TeleOp(name = "TeleOp")
@@ -43,28 +44,24 @@ public class teleOp extends OpMode {
         robot.rightDrive.setPower((rightPower * direction));
 
 
-        if(gamepad1.y){
-            robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev)-300);
-            robot.ADM.setPower(.5);
-        }
-
         if(gamepad1.a){
-            robot.ADM.setTargetPosition(300);
+            robot.ADM.setTargetPosition((int)(-robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev)+200);
             robot.ADM.setPower(-.5);
+        }
+        if(gamepad1.y){
+            robot.ADM.setTargetPosition(-50);
+            robot.ADM.setPower(.5);
         }
 
         if(gamepad1.x){
             robot.traverse.setPosition(robot.maxTraverse);
         }
-
         if(gamepad1.b){
             robot.traverse.setPosition(robot.minTraverse);
         }
-
         if(gamepad1.right_bumper){
             robot.traverse.setPosition(robot.midTraverseRight);
         }
-
         if(gamepad1.left_bumper){
             robot.traverse.setPosition(robot.midTraverseLeft);
         }
@@ -90,30 +87,12 @@ public class teleOp extends OpMode {
             }
         }
 
-        //Run to encoder position, then kill power
-        if(gamepad2.y){
-            robot.inVertical.setTargetPosition(robot.armHigh);
-            robot.intakePitch.setPosition(robot.boxDump);
-            robot.inVertical.setPower(-.1);
-        }
-        if(robot.inVertical.getCurrentPosition() < -80 && robot.inVertical.getTargetPosition() < -100) {
-            robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        }
-
-        //if a is pressed, set position to low and set power accordingly
-        if(gamepad2.a){
-            robot.inVertical.setTargetPosition(robot.armLow);
-            robot.intakePitch.setPosition(robot.boxStowed);
-            robot.inVertical.setPower(.05);
-        }
-        if(robot.inVertical.getCurrentPosition() > -80 && robot.inVertical.getTargetPosition() > -10) {
-                robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        }
+        //------------------------------------------------------------------------------------------
+        robot.inVertical.setMode(RUN_WITHOUT_ENCODER);
+        robot.inVertical.setPower(gamepad2.right_stick_y * 0.45);
 
         //Set motor power to stick input, directionally scaled
-        robot.inHorizontal.setPower(gamepad2.right_stick_y);
+        robot.inHorizontal.setPower(gamepad2.left_stick_y);
 
         //Control Intake
         if(gamepad2.right_trigger > 0)
@@ -131,7 +110,14 @@ public class teleOp extends OpMode {
             robot.intakePitch.setPosition(robot.boxDump);
             sleep(500);
         }
-
+        if(gamepad2.dpad_up) {
+            robot.intakePitch.setPosition(robot.boxStowed);
+            sleep(500);
+        }
+        if(gamepad2.dpad_down){
+            robot.intakePitch.setPosition(robot.boxIntake);
+            sleep(500);
+        }
 
         telemetry.addData("Pos", robot.inVertical.getCurrentPosition());
         telemetry.addData("Out", robot.inHorizontal.getCurrentPosition());
