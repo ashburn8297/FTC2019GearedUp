@@ -45,23 +45,31 @@ public class cubeAuto extends TunableLinearOpMode {
 
         //Raise ADM, and drop from lander
 
-        robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev)-100); //tuner
-        robot.ADM.setPower(.5);
-        telemetry.addData("Lift Encoder Value", robot.ADM.getCurrentPosition());
-
-        sleep(5000);
+        if (opModeIsActive()){
+            robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
+            robot.ADM.setPower(.5);
+            telemetry.addData("Lift Encoder Value", robot.ADM.getCurrentPosition());
+            sleep(5000);
+        }
 
         //Move lift left
-        robot.traverse.setPosition(robot.maxTraverse);
-        sleep(1000);
+        if (opModeIsActive()) {
+            robot.traverse.setPosition(robot.maxTraverse);
+            sleep(1000);
+        }
 
-        robot.marker.setPosition(robot.markerMid);
-        sleep(500);
-        robot.intakePitch.setPosition(robot.boxFlat);
-        robot.intake.setPower(-1);
-        sleep(500);
-        robot.marker.setPosition(robot.markerIn);
-        sleep(500);
+        if (opModeIsActive()) {
+            robot.marker.setPosition(robot.markerMid);
+            sleep(500);
+            robot.intakePitch.setPosition(robot.boxFlat);
+            robot.intake.setPower(-1);
+            sleep(500);
+        }
+
+        if (opModeIsActive()) {
+            robot.marker.setPosition(robot.markerIn);
+            sleep(500);
+        }
 
         robot.encoderDriveStraight(55, 5, opModeIsActive(), runtime);
         robot.intake.setPower(0);

@@ -39,26 +39,39 @@ public class ballAuto extends LinearOpMode {
         robot.inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //Raise ADM, and drop from lander
-
-        robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev)-100); //tuner
-        robot.ADM.setPower(.5);
-        telemetry.addData("Lift Encoder Value", robot.ADM.getCurrentPosition());
-        sleep(5000);
+        if (opModeIsActive()) {
+            robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
+            robot.ADM.setPower(.5);
+            telemetry.addData("Lift Encoder Value", robot.ADM.getCurrentPosition());
+            sleep(5000);
+        }
 
         //Move ADM to the side, move marker, keep box raised
-        robot.traverse.setPosition(robot.maxTraverse);
-        sleep(1000);
-        robot.marker.setPosition(robot.markerMid);
-        sleep(500);
-        robot.intakePitch.setPosition(robot.boxFlat);
-        robot.intake.setPower(-1);
-        sleep(500);
-        robot.marker.setPosition(robot.markerIn);
-        sleep(500);
+        if (opModeIsActive()) {
+            robot.traverse.setPosition(robot.maxTraverse);
+            sleep(1000);
+        }
+        if (opModeIsActive()) {
+            robot.marker.setPosition(robot.markerMid);
+            sleep(500);
+        }
 
-        robot.encoderDriveStraight(18, 3, opModeIsActive(), runtime);
-        robot.intake.setPower(0);
-        sleep(2000);
+        if (opModeIsActive()) {
+            robot.intakePitch.setPosition(robot.boxFlat);
+            robot.intake.setPower(-1);
+            sleep(500);
+        }
+
+        if (opModeIsActive()) {
+            robot.marker.setPosition(robot.markerIn);
+            sleep(500);
+        }
+
+        if (opModeIsActive()) {
+            robot.encoderDriveStraight(21, 3, opModeIsActive(), runtime);
+            robot.intake.setPower(0);
+            sleep(2000);
+        }
 
         stop();
     }

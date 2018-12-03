@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -13,7 +14,7 @@ import static org.firstinspires.ftc.teamcode.robotBase.midTraverseRight;
 
 
 @Autonomous(name = "BallAuto AGGRESSIVE")
-//@Disabled
+@Disabled
 public class ballAutoAggressive extends LinearOpMode {
     robotBase robot = new robotBase();
     private ElapsedTime runtime = new ElapsedTime();

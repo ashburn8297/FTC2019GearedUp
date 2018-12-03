@@ -70,6 +70,10 @@ public class teleOp extends OpMode {
             direction *= -1;
             sleep(500);
         }
+        if(gamepad1.dpad_down) {
+            robot.marker.setPosition(robot.markerMid);
+            sleep(250);
+        }
 
         if(gamepad1.dpad_left){
             double pos = robot.traverse.getPosition() + .02;

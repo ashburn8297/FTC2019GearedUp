@@ -23,7 +23,7 @@ import static org.firstinspires.ftc.teamcode.robotBase.midTraverseRight;
 
 
 @Autonomous(name = "CubeAuto AGGRESSIVE")
-//@Disabled
+@Disabled
 public class cubeAutoAggressive extends TunableLinearOpMode {
     robotBase robot = new robotBase();
     private ElapsedTime runtime = new ElapsedTime();

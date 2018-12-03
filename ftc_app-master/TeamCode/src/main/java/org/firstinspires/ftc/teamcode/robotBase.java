@@ -66,10 +66,9 @@ public class robotBase
 
     public static final double maxTraverse = .73;
     public static final double minTraverse = .32;
-    public static final double midTraverseRight = .58;
-    public static final double midTraverseLeft = .47;
+    public static final double midTraverseRight = .56;
+    public static final double midTraverseLeft = .48;
 
-    public static final double markerIn = .19;
     public static final double markerMid = .3;
     public static final double markerOut = .8;
 
