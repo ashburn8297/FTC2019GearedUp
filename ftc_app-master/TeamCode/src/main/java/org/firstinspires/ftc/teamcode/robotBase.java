@@ -69,6 +69,7 @@ public class robotBase
     public static final double midTraverseRight = .56;
     public static final double midTraverseLeft = .48;
 
+    public static final double markerIn = .15;
     public static final double markerMid = .3;
     public static final double markerOut = .8;
 
