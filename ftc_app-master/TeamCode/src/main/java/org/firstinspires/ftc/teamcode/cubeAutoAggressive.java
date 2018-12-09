@@ -61,29 +61,26 @@ public class cubeAutoAggressive extends TunableLinearOpMode {
 
         waitForStart();
         runtime.reset();
-        telemetry.update();
 
-        robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.inVertical.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        //Raise ADM, and drop from lander
-
-        robot.ADM.setTargetPosition((int)(robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev)-100); //tuner
-        robot.ADM.setPower(.5);
-        telemetry.addData("Lift Encoder Value", robot.ADM.getCurrentPosition());
+        //Lower Lift
+        if (opModeIsActive()) {
+            robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
+            robot.ADM.setPower(.5);
+            telemetry.addData("Lift Encoder Value", robot.ADM.getCurrentPosition());
+        }
 
         sleep(5000);
 
-        //Move lift left
-        robot.traverse.setPosition(robot.maxTraverse);
-        sleep(1000);
-
-        robot.marker.setPosition(robot.markerMid);
-        sleep(500);
-        robot.intakePitch.setPosition(robot.boxFlat);
-        robot.intake.setPower(-1);
-        sleep(500);
+        //Slide over
+        if (opModeIsActive()) {
+            robot.traverse.setPosition(robot.maxTraverse);
+            robot.marker.setPosition(robot.markerMid);
+            sleep(1000);
+            robot.intakePitch.setPosition(robot.boxStowed);
+            sleep(1000);
+            robot.marker.setPosition(robot.markerIn);
+        }
+        sleep(3000);
 
         /*//////////////////////////////////////////
 
@@ -91,71 +88,90 @@ public class cubeAutoAggressive extends TunableLinearOpMode {
         ARM MOTOR IS REVERSED SO NEGATIVE IS UP!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         /////////////////////////////////////////*/
-        robot.inVertical.setPower(-.45);
-        sleep(2000);
-        robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        robot.inVertical.setPower(0);
+        if (opModeIsActive()) {
+            robot.inVertical.setPower(-.45);
+            sleep(2000);
+            robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            robot.inVertical.setPower(0);
+            if (opModeIsActive()) {
 
-        //Vuforia command
-        if (tfod != null) {
-            tfod.activate();
-        }
-        runtime.reset();
-        while (runtime.seconds() < 4) {
-            if (tfod != null) {
-                // getUpdatedRecognitions() will return null if no new information is available since
-                // the last time that call was made.
-                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                if (updatedRecognitions != null) {
-                    if (updatedRecognitions.size() == 2) {
-                        int goldMineralX = -1;
-                        int silverMineral1X = -1;
-                        for (Recognition recognition : updatedRecognitions) {
-                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldMineralX = (int) recognition.getLeft();
-                            } else {
-                                silverMineral1X = (int) recognition.getLeft();
-                            }
-                        }
-                        if(goldMineralX == -1){
-                            freq[0]++;
-                        }
-                        else if (silverMineral1X != -1) {
-                            if (goldMineralX < silverMineral1X) {
-                                freq[1]++;
-                            } else {
-                                freq[2]++;
+                //Vuforia command
+                if (tfod != null) {
+                    tfod.activate();
+                }
+                runtime.reset();
+                while (runtime.seconds() < 4) {
+                    if (tfod != null) {
+                        // getUpdatedRecognitions() will return null if no new information is available since
+                        // the last time that call was made.
+                        List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                        if (updatedRecognitions != null) {
+                            if (updatedRecognitions.size() == 2) {
+                                int goldMineralX = -1;
+                                int silverMineral1X = -1;
+                                for (Recognition recognition : updatedRecognitions) {
+                                    if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                        goldMineralX = (int) recognition.getLeft();
+                                    } else {
+                                        silverMineral1X = (int) recognition.getLeft();
+                                    }
+                                }
+                                if (goldMineralX == -1) {
+                                    freq[0]++;
+                                } else if (silverMineral1X != -1) {
+                                    if (goldMineralX < silverMineral1X) {
+                                        freq[1]++;
+                                    } else {
+                                        freq[2]++;
+                                    }
+                                }
                             }
                         }
                     }
                 }
+                for (int i = 0; i < freq.length; i++) {
+                    if (freq[i] > max) {
+                        maxIndex = i;
+                        max = freq[i];
+                    }
+                }
             }
         }
-        for(int i=0; i<freq.length; i++) {
-            if (freq[i] > max) {
-                maxIndex = i;
-                max = freq[i];
-            }
-        }
 
-        if (tfod != null) {
-            tfod.shutdown();
-        }
+                if (tfod != null) {
+                    tfod.shutdown();
+                }
 
-        //Lower arm
-        robot.inVertical.setPower(.40);
-        sleep(2000);
-        robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        robot.inVertical.setPower(0);
+                //Lower arm
+                if (opModeIsActive()) {
+                    robot.inVertical.setPower(.40);
+                    sleep(2000);
+                    robot.inVertical.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    robot.inVertical.setPower(0);
+                }
+                sleep(1000);
 
-        robot.marker.setPosition(robot.markerIn);
-        sleep(500);
+                //Lower box and start intake
+                if (opModeIsActive()) {
+                    robot.intakePitch.setPosition(robot.boxFlat);
+                    robot.intake.setPower(-1.0);
+                }
+                sleep(1000);
 
-        telemetry.addData("Location", maxIndex);
-        telemetry.update();
+                //Bring marker back in
+                if (opModeIsActive()) {
+                    robot.marker.setPosition(robot.markerIn);
+                }
+                sleep(500);
 
-        sleep(500);
+                telemetry.addData("Location", maxIndex);
+                telemetry.update();
 
+                sleep(500);
+
+
+                //Driving Commands
+        /*
         robot.encoderDriveStraight(10, 2.0, opModeIsActive(), runtime);
 
         if(maxIndex == 0) {
@@ -178,35 +194,35 @@ public class cubeAutoAggressive extends TunableLinearOpMode {
         robot.turnByGyro(45, .2, opModeIsActive());
         robot.marker.setPosition(robot.markerOut);
         robot.encoderDriveStraight(-80, 8, opModeIsActive(), runtime);
+        */
 
-        stop();
-    }
-    /**
-     * Initialize the Vuforia localization engine.
-     */
-    private void initVuforia() {
-        /*
-         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
-         */
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+            }
+            /**
+             * Initialize the Vuforia localization engine.
+             */
+            private void initVuforia () {
+                /*
+                 * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+                 */
+                VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+                parameters.vuforiaLicenseKey = VUFORIA_KEY;
+                parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
 
-        //  Instantiate the Vuforia engine
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+                //  Instantiate the Vuforia engine
+                vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
-        // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
-    }
+                // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
+            }
 
-    /**
-     * Initialize the Tensor Flow Object Detection engine.
-     */
-    private void initTfod() {
-        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
-    }
-}
+            /**
+             * Initialize the Tensor Flow Object Detection engine.
+             */
+            private void initTfod () {
+                int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                        "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+                TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+                tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+                tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+            }
+        }

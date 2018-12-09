@@ -1,25 +1,18 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-
-import java.util.List;
 
 import static android.os.SystemClock.sleep;
 
@@ -45,7 +38,8 @@ public class robotBase
     public Servo intakePitch                = null; //intake_pitch
     public CRServo intake                   = null; //intake
     public DigitalChannel hall              = null; //hall
-    public ModernRoboticsI2cGyro gyro       = null; //gyro
+    IntegratingGyroscope gyro;
+    NavxMicroNavigationSensor navxMicro;
 
     /* local OpMode members. */
     HardwareMap hwMap                       = null;
@@ -132,7 +126,8 @@ public class robotBase
         intakePitch = hwMap.get(Servo.class, "intake_pitch");
         intakePitch.setDirection(Servo.Direction.FORWARD);
 
-        gyro = (ModernRoboticsI2cGyro)hwMap.gyroSensor.get("gyro");
+        navxMicro = hwMap.get(NavxMicroNavigationSensor.class, "navx");
+        gyro = (IntegratingGyroscope)navxMicro;
     }
 
     //Auto Methods
@@ -185,21 +180,19 @@ public class robotBase
 
 
     public void turnByGyro(double targetAngle, double speed, boolean opMode) {
-        //float initAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-        //float totalDist = (float)(Math.abs(initAngle)-Math.abs(targetAngle));
         while(opMode){
-            float zAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            float CurAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 
-            if ((zAngle >= (targetAngle - (HEADING_THRESHOLD / 2))) && (zAngle <= (targetAngle + (HEADING_THRESHOLD / 2)))) {
+            if ((CurAngle >= (targetAngle - (HEADING_THRESHOLD / 2))) && (CurAngle <= (targetAngle + (HEADING_THRESHOLD / 2)))) {
                 rightDrive.setPower(0);
                 leftDrive.setPower(0);
                 opMode = false;
             }
-            else if(zAngle<targetAngle){
+            else if(CurAngle<targetAngle){
                 rightDrive.setPower(-speed);
                 leftDrive.setPower(speed);
             }
-            else if(zAngle>targetAngle){
+            else if(CurAngle>targetAngle){
                 rightDrive.setPower(speed);
                 leftDrive.setPower(-speed);
             }
@@ -228,25 +221,16 @@ public class robotBase
         return (float)in;
     }
 
-    public void admMove(int targetPos){
-        ElapsedTime runtime=new ElapsedTime();
-        int curPos = ADM.getCurrentPosition();
-        boolean stall=false;
-        while(ADM.getCurrentPosition()!=targetPos && !stall){
-            if(targetPos < ADM.getCurrentPosition())
-                ADM.setPower(-.5);
-            else if(targetPos > ADM.getCurrentPosition())
-                ADM.setPower(.5);
-            if(Math.abs(ADM.getCurrentPosition()-curPos)<5){
-                stall=true;
-            }
-        }
-        ADM.setPower(0);
-
-
-
-
+    String formatRate(float rate) {
+        return String.format("%.3f", rate);
     }
 
+    String formatAngle(AngleUnit angleUnit, double angle) {
+        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    }
+
+    String formatDegrees(double degrees){
+        return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
 }
 

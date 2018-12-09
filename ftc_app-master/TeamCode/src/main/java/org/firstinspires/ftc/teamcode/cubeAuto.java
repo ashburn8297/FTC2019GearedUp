@@ -30,57 +30,52 @@ public class cubeAuto extends TunableLinearOpMode {
     public void runOpMode() {
         robot.init(hardwareMap);
         robot.traverse.setPosition(midTraverseRight);
-        /** Wait for the game to begin */
-        telemetry.addData(">", "Press Play to");
+        robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        telemetry.log().add("Gyro Calibrating. Do Not Move!");
+
+       runtime.reset();
+        while (robot.navxMicro.isCalibrating())  {
+            telemetry.addData("calibrating", "%s", Math.round(runtime.seconds())%2==0 ? "|.." : "..|");
+            telemetry.update();
+            sleep(50);
+        }
+        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
+        telemetry.clear();
+
         telemetry.update();
 
         waitForStart();
         runtime.reset();
-        telemetry.update();
 
-        robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.inVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.inVertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        //Raise ADM, and drop from lander
-
+        //Lower Lift
         if (opModeIsActive()){
             robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
             robot.ADM.setPower(.5);
             telemetry.addData("Lift Encoder Value", robot.ADM.getCurrentPosition());
-            sleep(5000);
         }
 
-        //Move lift left
-        if (opModeIsActive()) {
+        sleep(5000);
+        robot.ADM.setPower(.1); //To stop jittering
+
+        //Slide over
+        if (opModeIsActive()){
             robot.traverse.setPosition(robot.maxTraverse);
-            sleep(1000);
-        }
-
-        if (opModeIsActive()) {
             robot.marker.setPosition(robot.markerMid);
-            sleep(500);
-            robot.intakePitch.setPosition(robot.boxFlat);
-            robot.intake.setPower(-1);
-            sleep(500);
-        }
-
-        if (opModeIsActive()) {
+            sleep(1000);
+            robot.intakePitch.setPosition(robot.boxStowed);
+            sleep(1000);
             robot.marker.setPosition(robot.markerIn);
-            sleep(500);
         }
+        sleep(3000);
 
-        robot.encoderDriveStraight(55, 5, opModeIsActive(), runtime);
-        robot.intake.setPower(0);
-        sleep(1000);
-        robot.turnByGyro(-45, .2, opModeIsActive());
-        sleep(500);
-        robot.brake();
+        //Drive Forward into depot
 
-        robot.marker.setPosition(robot.markerOut);
-        sleep(1000);
+        //Turn to the left
+        robot.turnByGyro(45, .3, opModeIsActive());
 
-        stop();
+        //Drop off marker (out, mid)
+
     }
 }
