@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -13,35 +12,47 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.List;
 
-import static org.firstinspires.ftc.teamcode.robotBase.midTraverseRight;
-
-
-@Autonomous(name = "CubeAuto AGGRESSIVE")
+@Autonomous(name = "Image Recognition Test")
 //@Disabled
-public class cubeAutoAggressive extends LinearOpMode {
-    robotBaseAuto robot = new robotBaseAuto();
+public class ImageRecognitionTest extends LinearOpMode {
+    //robotBaseAuto robot = new robotBaseAuto();
     private ElapsedTime runtime = new ElapsedTime();
-
-    int maxIndex = 0;
-    int[] freq = new int[3];
-    int max = 0;
-
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
-
+    int maxIndex = 0;
+    int[] freq = new int[3];
+    int max = 0;
+    /*
+     * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
+     * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
+     * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
+     * web site at https://developer.vuforia.com/license-manager.
+     *
+     * Vuforia license keys are always 380 characters long, and look as if they contain mostly
+     * random data. As an example, here is a example of a fragment of a valid key:
+     *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
+     * Once you've obtained a license key, copy the string from the Vuforia web site
+     * and paste it in to your code on the next line, between the double quotes.
+     */
     private static final String VUFORIA_KEY = "AbEDH9P/////AAABmcFPgUDLz0tMh55QD8t9w6Bqxt3h/G+JEMdItgpjoR+S1FFRIeF/w2z5K7r/nUzRZKleksLHPglkfMKX0NltxxpVUpXqj+w6sGvedaNq449JZbEQxaYe4SU+3NNi0LBN879h9LZW9RxJFOMt7HfgssnBdg+3IsiwVKKYnovU+99oz3gJkcOtYhUS9ku3s0Wz2n6pOu3znT3bICiR0/480N63FS7d6Mk6sqN7mNyxVcRf8D5mqIMKVNGAjni9nSYensl8GAJWS1vYfZ5aQhXKs9BPM6mST5qf58Tg4xWoHltcyPp0x33tgQHBbcel0M9pYe/7ub1pmzvxeBqVgcztmzC7uHnosDO3/2MAMah8qijd";
+
+    /**
+     * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
+     * localization engine.
+     */
     private VuforiaLocalizer vuforia;
+
+    /**
+     * {@link #tfod} is the variable we will use to store our instance of the Tensor Flow Object
+     * Detection engine.
+     */
     private TFObjectDetector tfod;
 
+    @Override
     public void runOpMode() {
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
         // first.
-        robot.init(hardwareMap);
-        robot.traverse.setPosition(midTraverseRight);
-        robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //tensor flow IR start
         initVuforia();
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
@@ -50,29 +61,10 @@ public class cubeAutoAggressive extends LinearOpMode {
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
 
-        telemetry.update();
-
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start tracking");
         telemetry.update();
-
-
-
         waitForStart();
-
-        //Lower Lift
-        if (opModeIsActive()) {
-            robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
-            robot.ADM.setPower(1.0);
-        }
-
-        sleep(3000);
-        robot.ADM.setPower(.05); //To stop jittering
-
-        if(opModeIsActive()){
-            robot.traverse.setPosition(robot.maxTraverse);
-        }
-
         runtime.reset();
 
         if (opModeIsActive()) {
@@ -101,7 +93,7 @@ public class cubeAutoAggressive extends LinearOpMode {
                                     silverMineral2X = (int) recognition.getLeft();
                                 }
                             }
-                            if (silverMineral1X != -1 && silverMineral2X != -1) {
+                            if ((silverMineral1X != -1 && silverMineral2X != -1) || goldMineralX == -1) {
                                 freq[2]++;
                             }
                             else if (goldMineralX < silverMineral1X || goldMineralX < silverMineral2X) {
@@ -133,43 +125,7 @@ public class cubeAutoAggressive extends LinearOpMode {
         telemetry.addData("Index 1", freq[1]);
         telemetry.addData("Index 2", freq[2]);
         telemetry.update();
-
-
-        //Slide over
-        if (opModeIsActive()) {
-            robot.encoderDriveStraight(4, 1.0, opModeIsActive(), runtime);
-        }
-
-        if(maxIndex == 0) {
-            robot.turnByEncoder(30, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(39, 2.5, opModeIsActive(), runtime);
-            robot.encoderDriveStraight(-2, 1.0, opModeIsActive(), runtime);
-            robot.turnByEncoder(-80, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(30, 2.0, opModeIsActive(), runtime);
-            robot.turnByEncoder(90, .11, opModeIsActive(), 3.0, runtime);
-        }
-        else if(maxIndex == 1){
-            robot.turnByEncoder(0, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(53, 3.0, opModeIsActive(), runtime);
-            robot.turnByEncoder(45, .09, opModeIsActive(), 3.0, runtime);
-
-        }
-        else if(maxIndex == 2) {
-            robot.turnByEncoder(-32, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(38, 3.0, opModeIsActive(), runtime);
-            robot.encoderDriveStraight(-2, 1.0, opModeIsActive(), runtime);
-            robot.turnByEncoder(75, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(30, 2.0, opModeIsActive(), runtime);
-        }
-
-
-        //Drop off marker (out, in)
-        if (opModeIsActive()) {
-            robot.marker.setPosition(robot.markerOut);
-            sleep(1000);
-            robot.marker.setPosition(robot.markerMid);
-        }
-
+        sleep(10000);
     }
     private void initVuforia () {
         /*

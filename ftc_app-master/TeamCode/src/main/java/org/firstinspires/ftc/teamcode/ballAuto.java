@@ -21,9 +21,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import static org.firstinspires.ftc.teamcode.robotBase.midTraverseRight;
 
 
-@Autonomous(name = "CubeAuto SAFE")
+@Autonomous(name = "BallAuto SAFE")
 //@Disabled
-public class cubeAuto extends LinearOpMode {
+public class ballAuto extends LinearOpMode {
     robotBaseAuto robot = new robotBaseAuto();
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -33,6 +33,17 @@ public class cubeAuto extends LinearOpMode {
         robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.ADM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+        telemetry.log().add("Gyro Calibrating. Do Not Move!");
+
+        runtime.reset();
+        while (robot.navxMicro.isCalibrating())  {
+            telemetry.addData("Calibrating", "%s", Math.round(runtime.seconds())%2==0 ? "|.." : "..|");
+            telemetry.update();
+            sleep(100);
+        }
+        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
+        telemetry.clear();
+
         telemetry.update();
 
         waitForStart();
@@ -40,26 +51,20 @@ public class cubeAuto extends LinearOpMode {
 
         //Lower Lift
         if (opModeIsActive()){
-            robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
+            robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100);
             robot.ADM.setPower(.95);
             telemetry.addData("Lift Encoder Value", robot.ADM.getCurrentPosition());
         }
 
         sleep(3000);
         robot.ADM.setPower(.05); //To stop jittering
-        robot.traverse.setPosition(robot.maxTraverse);
-        sleep(2000);
 
-        robot.turnByEncoder(0, .07, opModeIsActive(), 3.0, runtime);
-        robot.encoderDriveStraight(51, 5.0, opModeIsActive(), runtime);
-        sleep(1000);
-        robot.turnByEncoder(40, .07, opModeIsActive(), 3.0, runtime);
-
-        if (opModeIsActive()) {
-            robot.marker.setPosition(robot.markerOut);
-            sleep(1000);
-            robot.marker.setPosition(robot.markerMid);
+        //Slide over
+        if (opModeIsActive()){
+            robot.traverse.setPosition(robot.maxTraverse);
+            sleep(2000);
+            robot.encoderDriveStraight(26, 5.0, opModeIsActive(), runtime);
         }
-
+        sleep(1000);
     }
 }

@@ -16,9 +16,9 @@ import java.util.List;
 import static org.firstinspires.ftc.teamcode.robotBase.midTraverseRight;
 
 
-@Autonomous(name = "CubeAuto AGGRESSIVE")
+@Autonomous(name = "BallAuto AGGRESSIVE ")
 //@Disabled
-public class cubeAutoAggressive extends LinearOpMode {
+public class ballAutoAggressiveNoDepot extends LinearOpMode {
     robotBaseAuto robot = new robotBaseAuto();
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -57,13 +57,12 @@ public class cubeAutoAggressive extends LinearOpMode {
         telemetry.update();
 
 
-
         waitForStart();
 
         //Lower Lift
         if (opModeIsActive()) {
             robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
-            robot.ADM.setPower(1.0);
+            robot.ADM.setPower(.95);
         }
 
         sleep(3000);
@@ -141,35 +140,21 @@ public class cubeAutoAggressive extends LinearOpMode {
         }
 
         if(maxIndex == 0) {
-            robot.turnByEncoder(30, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(39, 2.5, opModeIsActive(), runtime);
-            robot.encoderDriveStraight(-2, 1.0, opModeIsActive(), runtime);
-            robot.turnByEncoder(-80, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(30, 2.0, opModeIsActive(), runtime);
-            robot.turnByEncoder(90, .11, opModeIsActive(), 3.0, runtime);
+            robot.turnByEncoder(30, .13, opModeIsActive(), 2.0, runtime);
+            robot.encoderDriveStraight(24, 2.0, opModeIsActive(), runtime);
+            robot.turnByEncoder(-25, .13, opModeIsActive(), 2.0, runtime);
+            robot.encoderDriveStraight(-24, 3.0, opModeIsActive(), runtime);
         }
         else if(maxIndex == 1){
-            robot.turnByEncoder(0, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(53, 3.0, opModeIsActive(), runtime);
-            robot.turnByEncoder(45, .09, opModeIsActive(), 3.0, runtime);
-
+            robot.turnByEncoder(0, .3, opModeIsActive(), 2.0, runtime);
+            robot.encoderDriveStraight(18, 3.0, opModeIsActive(), runtime);
+            robot.encoderDriveStraight(-18, 3.0, opModeIsActive(), runtime);
         }
-        else if(maxIndex == 2) {
-            robot.turnByEncoder(-32, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(38, 3.0, opModeIsActive(), runtime);
-            robot.encoderDriveStraight(-2, 1.0, opModeIsActive(), runtime);
-            robot.turnByEncoder(75, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(30, 2.0, opModeIsActive(), runtime);
+        else if(maxIndex == 2){
+            robot.turnByEncoder(-35, .3, opModeIsActive(), 2.0, runtime);
+            robot.encoderDriveStraight(26.3, 2.0, opModeIsActive(), runtime);
+            robot.encoderDriveStraight(-24, 3.0, opModeIsActive(), runtime);
         }
-
-
-        //Drop off marker (out, in)
-        if (opModeIsActive()) {
-            robot.marker.setPosition(robot.markerOut);
-            sleep(1000);
-            robot.marker.setPosition(robot.markerMid);
-        }
-
     }
     private void initVuforia () {
         /*

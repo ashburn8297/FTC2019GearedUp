@@ -2,10 +2,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
@@ -27,7 +26,7 @@ KNOWN ISSUES
 Pull this class for anything that has to do with the current robot config
  */
 
-public class robotBase
+public class robotBaseAuto
 {
     /* Public OpMode members. */
     public DcMotor leftDrive                = null; //left_drive
@@ -44,7 +43,7 @@ public class robotBase
     public DigitalChannel vertHall          = null; //vertHall
 
     IntegratingGyroscope gyro;
-    RevBlinkinLedDriver blinkinLedDriver;
+
     NavxMicroNavigationSensor navxMicro;
 
     /* local OpMode members. */
@@ -76,7 +75,7 @@ public class robotBase
 
     /* Constructor */
 
-    public robotBase(){
+    public robotBaseAuto(){
 
     }
     /* Initialize standard Hardware interfaces */
@@ -127,7 +126,7 @@ public class robotBase
         intakeGate = hwMap.get(Servo.class, "intake_pitch");
         intakeGate.setDirection(Servo.Direction.FORWARD);
 
-        blinkinLedDriver = hwMap.get(RevBlinkinLedDriver.class, "blinkin");
+
 
         navxMicro = hwMap.get(NavxMicroNavigationSensor.class, "navx");
         gyro = navxMicro;

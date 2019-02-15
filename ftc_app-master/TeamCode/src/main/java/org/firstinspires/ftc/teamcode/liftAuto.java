@@ -9,7 +9,7 @@ import static org.firstinspires.ftc.teamcode.robotBase.midTraverseRight;
 
 @Autonomous(name = "LiftAuto")
 public class liftAuto extends LinearOpMode {
-    robotBase robot = new robotBase();
+    robotBaseInitialize robot = new robotBaseInitialize();
     private ElapsedTime runtime = new ElapsedTime();
 
     public void runOpMode() {
@@ -24,24 +24,17 @@ public class liftAuto extends LinearOpMode {
         //Lower Lift
         if (opModeIsActive()){
             robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
-            robot.ADM.setPower(.5);
+            robot.ADM.setPower(.95);
             telemetry.addData("Lift Encoder Value", robot.ADM.getCurrentPosition());
         }
 
-        sleep(5000);
-        robot.ADM.setPower(.1); //To stop jittering
+        sleep(3000);
+        robot.ADM.setPower(.05); //To stop jittering
 
         //Slide over
         if (opModeIsActive()){
             robot.traverse.setPosition(robot.maxTraverse);
-            robot.marker.setPosition(robot.markerMid);
-            sleep(1000);
-            robot.intakePitch.setPosition(robot.boxStowed);
-            sleep(1000);
-            robot.marker.setPosition(robot.markerIn);
+            sleep(3000);
         }
-        sleep(3000);
-
-
     }
 }
