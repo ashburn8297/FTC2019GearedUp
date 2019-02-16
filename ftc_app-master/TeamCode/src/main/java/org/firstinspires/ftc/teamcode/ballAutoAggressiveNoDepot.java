@@ -80,7 +80,7 @@ public class ballAutoAggressiveNoDepot extends LinearOpMode {
                 tfod.activate();
             }
 
-            while (opModeIsActive()&&runtime.seconds()<3) {
+            while (opModeIsActive()&&runtime.seconds()<6) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -113,6 +113,29 @@ public class ballAutoAggressiveNoDepot extends LinearOpMode {
                             telemetry.addData("S1", silverMineral1X);
                             telemetry.addData("S2", silverMineral2X);
                         }
+                        else if (updatedRecognitions.size() == 1) {
+                            int goldMineralX = -1;
+                            int silverMineral1X = -1;
+                            for (Recognition recognition : updatedRecognitions) {
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                    goldMineralX = (int) recognition.getLeft();
+                                } else{
+                                    silverMineral1X = (int) recognition.getLeft();
+                                }
+                            }
+                            if (silverMineral1X > 150 || goldMineralX < 150) {
+                                freq[0]++;
+                            }
+                            else{
+                                freq[1]++;
+                            }
+                            telemetry.addData("Gold", goldMineralX);
+                            telemetry.addData("S1", silverMineral1X);
+
+                        }
+                        else{
+                            freq[2]++;
+                        }
                         telemetry.update();
                     }
                 }
@@ -139,22 +162,22 @@ public class ballAutoAggressiveNoDepot extends LinearOpMode {
             robot.encoderDriveStraight(4, 1.0, opModeIsActive(), runtime);
         }
 
+        sleep(5000);
+
         if(maxIndex == 0) {
             robot.turnByEncoder(30, .13, opModeIsActive(), 2.0, runtime);
-            robot.encoderDriveStraight(24, 2.0, opModeIsActive(), runtime);
-            robot.turnByEncoder(-25, .13, opModeIsActive(), 2.0, runtime);
-            robot.encoderDriveStraight(-24, 3.0, opModeIsActive(), runtime);
+            robot.encoderDriveStraight(24, 4.0, opModeIsActive(), runtime);
         }
         else if(maxIndex == 1){
-            robot.turnByEncoder(0, .3, opModeIsActive(), 2.0, runtime);
-            robot.encoderDriveStraight(18, 3.0, opModeIsActive(), runtime);
-            robot.encoderDriveStraight(-18, 3.0, opModeIsActive(), runtime);
+            robot.turnByEncoder(0, .13, opModeIsActive(), 2.0, runtime);
+            robot.encoderDriveStraight(18, 4.0, opModeIsActive(), runtime);
+
         }
         else if(maxIndex == 2){
-            robot.turnByEncoder(-35, .3, opModeIsActive(), 2.0, runtime);
-            robot.encoderDriveStraight(26.3, 2.0, opModeIsActive(), runtime);
-            robot.encoderDriveStraight(-24, 3.0, opModeIsActive(), runtime);
+            robot.turnByEncoder(-35, .13, opModeIsActive(), 2.0, runtime);
+            robot.encoderDriveStraight(24, 4.0, opModeIsActive(), runtime);
         }
+        robot.encoderDriveCrater(8, 4.0, opModeIsActive(), runtime);
     }
     private void initVuforia () {
         /*

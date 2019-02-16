@@ -58,6 +58,7 @@ public class robotBaseAuto
     public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV_rev * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
     public static final double  DRIVE_SPEED = 0.24; //.23
+    public static final double  DRIVE_SPEED_CRATER = 0.1; //.23
     public static final double  HEADING_THRESHOLD  = 2;
 
     public static final double  LEAD_SCREW_TURNS = 12.25; // Turns in the ADM lead screw
@@ -174,13 +175,53 @@ public class robotBaseAuto
             leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            sleep(250);   // optional pause after each move
+            sleep(500);   // optional pause after each move
         }
 
     }
+    public void encoderDriveCrater(double inches, double timeoutS, boolean opMode, ElapsedTime runtime) {
+        int newLeftTarget;
+        int newRightTarget;
+
+        // Ensure that the opmode is still active
+        if (opMode) {
+
+            // Turn On RUN_TO_POSITION
+            leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = leftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            newRightTarget = rightDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            leftDrive.setTargetPosition(newLeftTarget);
+            rightDrive.setTargetPosition(newRightTarget);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            leftDrive.setPower(Math.abs(DRIVE_SPEED_CRATER));
+            rightDrive.setPower(Math.abs(DRIVE_SPEED_CRATER));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opMode && (runtime.seconds() < timeoutS) && (leftDrive.isBusy() || rightDrive.isBusy())) {
+
+            }
+            // Turn off RUN_TO_POSITION
+            brake();
+
+            leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            sleep(500);   // optional pause after each move
+        }
+    }
 
 
-    public void turnByGyro(double targetAngle, double speed, boolean opMode, double timeoutS, ElapsedTime runtime) {
+        public void turnByGyro(double targetAngle, double speed, boolean opMode, double timeoutS, ElapsedTime runtime) {
         runtime.reset();
         while(opMode && runtime.seconds() <timeoutS){
             float CurAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;

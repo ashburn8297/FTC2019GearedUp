@@ -73,7 +73,7 @@ public class ImageRecognitionTest extends LinearOpMode {
                 tfod.activate();
             }
 
-            while (opModeIsActive()&&runtime.seconds()<3) {
+            while (opModeIsActive()&&runtime.seconds()<5) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.

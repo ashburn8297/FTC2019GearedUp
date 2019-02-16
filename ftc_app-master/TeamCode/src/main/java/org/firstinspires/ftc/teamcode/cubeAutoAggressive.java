@@ -81,7 +81,7 @@ public class cubeAutoAggressive extends LinearOpMode {
                 tfod.activate();
             }
 
-            while (opModeIsActive()&&runtime.seconds()<3) {
+            while (opModeIsActive()&&runtime.seconds()<6) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -103,17 +103,39 @@ public class cubeAutoAggressive extends LinearOpMode {
                             }
                             if (silverMineral1X != -1 && silverMineral2X != -1) {
                                 freq[2]++;
-                            }
-                            else if (goldMineralX < silverMineral1X || goldMineralX < silverMineral2X) {
+                            } else if (goldMineralX < silverMineral1X || goldMineralX < silverMineral2X) {
                                 freq[0]++;
-                            }
-                            else if (goldMineralX > silverMineral1X || goldMineralX > silverMineral2X){
+                            } else if (goldMineralX > silverMineral1X || goldMineralX > silverMineral2X) {
                                 freq[1]++;
                             }
                             telemetry.addData("Gold", goldMineralX);
                             telemetry.addData("S1", silverMineral1X);
                             telemetry.addData("S2", silverMineral2X);
                         }
+                        else if (updatedRecognitions.size() == 1) {
+                            int goldMineralX = -1;
+                            int silverMineral1X = -1;
+                            for (Recognition recognition : updatedRecognitions) {
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                    goldMineralX = (int) recognition.getLeft();
+                                } else{
+                                    silverMineral1X = (int) recognition.getLeft();
+                                }
+                            }
+                            if (silverMineral1X > 150 || goldMineralX < 150) {
+                                freq[0]++;
+                            }
+                            else{
+                                freq[1]++;
+                            }
+                            telemetry.addData("Gold", goldMineralX);
+                            telemetry.addData("S1", silverMineral1X);
+
+                        }
+                        else{
+                            freq[2]++;
+                        }
+
                         telemetry.update();
                     }
                 }
@@ -142,8 +164,8 @@ public class cubeAutoAggressive extends LinearOpMode {
 
         if(maxIndex == 0) {
             robot.turnByEncoder(30, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(39, 2.5, opModeIsActive(), runtime);
-            robot.encoderDriveStraight(-2, 1.0, opModeIsActive(), runtime);
+            robot.encoderDriveStraight(36, 3.0, opModeIsActive(), runtime);
+            robot.encoderDriveCrater(-2, 1.0, opModeIsActive(), runtime);
             robot.turnByEncoder(-80, .09, opModeIsActive(), 3.0, runtime);
             robot.encoderDriveStraight(30, 2.0, opModeIsActive(), runtime);
             robot.turnByEncoder(90, .11, opModeIsActive(), 3.0, runtime);
@@ -156,8 +178,8 @@ public class cubeAutoAggressive extends LinearOpMode {
         }
         else if(maxIndex == 2) {
             robot.turnByEncoder(-32, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(38, 3.0, opModeIsActive(), runtime);
-            robot.encoderDriveStraight(-2, 1.0, opModeIsActive(), runtime);
+            robot.encoderDriveStraight(40, 3.0, opModeIsActive(), runtime);
+            robot.encoderDriveCrater(-3, 1.5, opModeIsActive(), runtime);
             robot.turnByEncoder(75, .09, opModeIsActive(), 3.0, runtime);
             robot.encoderDriveStraight(30, 2.0, opModeIsActive(), runtime);
         }
@@ -170,6 +192,9 @@ public class cubeAutoAggressive extends LinearOpMode {
             robot.marker.setPosition(robot.markerMid);
         }
 
+        robot.turnByEncoder(-100, .09, opModeIsActive(), 3.0, runtime);
+        robot.encoderDriveStraight(-10, 1.0, opModeIsActive(), runtime);
+        sleep(1000);
     }
     private void initVuforia () {
         /*
