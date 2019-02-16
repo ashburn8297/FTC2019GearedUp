@@ -124,12 +124,12 @@ public class teleopRedo extends OpMode {
         }
 
         if(direction == 1) {
-            leftPower = gamepad1.left_stick_y;
-            rightPower = gamepad1.right_stick_y;
+            leftPower = getWheelPower(gamepad1.left_stick_y);
+            rightPower = getWheelPower(gamepad1.right_stick_y);
         }
         else if(direction == -1){
-            rightPower = gamepad1.left_stick_y;
-            leftPower = gamepad1.right_stick_y;
+            rightPower = getWheelPower(gamepad1.left_stick_y);
+            leftPower = getWheelPower(gamepad1.right_stick_y);
         }
         if(gamepad1.right_trigger > .25) {
             leftDrive.setPower((leftPower * direction * boost));
@@ -212,14 +212,18 @@ public class teleopRedo extends OpMode {
         inVertical.setPower(-gamepad2.right_stick_y * 0.075);
         inHorizontal.setPower(gamepad2.left_stick_y);
 
-        telemetry.addData("Arm", inVertical.getCurrentPosition());
+        /*telemetry.addData("Arm", inVertical.getCurrentPosition());
         telemetry.addData("VertHAll", vertHall.getState());
         //Set motor power to stick input, directionally scale
 
         telemetry.addData("Right Stick",gamepad1.right_stick_y);
         telemetry.addData("Left Stick",gamepad1.left_stick_y);
         telemetry.addData("Right Drive",rightDrive.getCurrentPosition());
-        telemetry.addData("Left Drive",leftDrive.getCurrentPosition());
+        telemetry.addData("Left Drive",leftDrive.getCurrentPosition());*/
 
+    }
+    public static double getWheelPower(double in){
+        in *= .27;
+        return in;
     }
 }
