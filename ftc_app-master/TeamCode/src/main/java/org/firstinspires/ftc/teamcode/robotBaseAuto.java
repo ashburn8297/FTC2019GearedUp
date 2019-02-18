@@ -58,7 +58,7 @@ public class robotBaseAuto
     public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV_rev * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
     public static final double  DRIVE_SPEED = 0.24; //.23
-    public static final double  DRIVE_SPEED_CRATER = 0.1; //.23
+    public static final double  DRIVE_SPEED_CRATER = 0.05; //.1
     public static final double  HEADING_THRESHOLD  = 2;
 
     public static final double  LEAD_SCREW_TURNS = 12.25; // Turns in the ADM lead screw

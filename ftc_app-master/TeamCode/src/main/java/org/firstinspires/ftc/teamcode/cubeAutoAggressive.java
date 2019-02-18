@@ -81,61 +81,44 @@ public class cubeAutoAggressive extends LinearOpMode {
                 tfod.activate();
             }
 
-            while (opModeIsActive()&&runtime.seconds()<6) {
+            while (opModeIsActive()&&runtime.seconds()<5) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
                         telemetry.addData("# Object Detected", updatedRecognitions.size());
-                        if (updatedRecognitions.size() == 2) {
+                        if (updatedRecognitions.size() >= 2) {
                             int goldMineralX = -1;
+                            int goldMineralY = -1;
                             int silverMineral1X = -1;
                             int silverMineral2X = -1;
                             for (Recognition recognition : updatedRecognitions) {
-                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                    goldMineralX = (int) recognition.getLeft();
-                                } else if (silverMineral1X == -1) {
-                                    silverMineral1X = (int) recognition.getLeft();
-                                } else {
-                                    silverMineral2X = (int) recognition.getLeft();
+                                if(recognition.getTop() > 500) {
+                                    if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                        goldMineralX = (int) recognition.getLeft();
+                                        goldMineralY = (int) recognition.getTop();
+                                    } else if (silverMineral1X == -1) {
+                                        silverMineral1X = (int) recognition.getLeft();
+                                    } else {
+                                        silverMineral2X = (int) recognition.getLeft();
+                                    }
                                 }
                             }
-                            if (silverMineral1X != -1 && silverMineral2X != -1) {
+                            if ((silverMineral1X != -1 && silverMineral2X != -1) || goldMineralX == -1) {
                                 freq[2]++;
-                            } else if (goldMineralX < silverMineral1X || goldMineralX < silverMineral2X) {
+                            }
+                            else if (goldMineralX < silverMineral1X || goldMineralX < silverMineral2X) {
                                 freq[0]++;
-                            } else if (goldMineralX > silverMineral1X || goldMineralX > silverMineral2X) {
+                            }
+                            else if (goldMineralX > silverMineral1X || goldMineralX > silverMineral2X){
                                 freq[1]++;
                             }
                             telemetry.addData("Gold", goldMineralX);
+                            telemetry.addData("Gold Y", goldMineralY);
                             telemetry.addData("S1", silverMineral1X);
                             telemetry.addData("S2", silverMineral2X);
                         }
-                        else if (updatedRecognitions.size() == 1) {
-                            int goldMineralX = -1;
-                            int silverMineral1X = -1;
-                            for (Recognition recognition : updatedRecognitions) {
-                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                    goldMineralX = (int) recognition.getLeft();
-                                } else{
-                                    silverMineral1X = (int) recognition.getLeft();
-                                }
-                            }
-                            if (silverMineral1X > 150 || goldMineralX < 150) {
-                                freq[0]++;
-                            }
-                            else{
-                                freq[1]++;
-                            }
-                            telemetry.addData("Gold", goldMineralX);
-                            telemetry.addData("S1", silverMineral1X);
-
-                        }
-                        else{
-                            freq[2]++;
-                        }
-
                         telemetry.update();
                     }
                 }
@@ -172,7 +155,7 @@ public class cubeAutoAggressive extends LinearOpMode {
         }
         else if(maxIndex == 1){
             robot.turnByEncoder(0, .09, opModeIsActive(), 3.0, runtime);
-            robot.encoderDriveStraight(53, 3.0, opModeIsActive(), runtime);
+            robot.encoderDriveStraight(51, 3.0, opModeIsActive(), runtime);
             robot.turnByEncoder(45, .09, opModeIsActive(), 3.0, runtime);
 
         }

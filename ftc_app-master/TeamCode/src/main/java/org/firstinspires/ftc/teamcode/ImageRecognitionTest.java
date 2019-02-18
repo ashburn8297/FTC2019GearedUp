@@ -86,7 +86,7 @@ public class ImageRecognitionTest extends LinearOpMode {
                             int silverMineral1X = -1;
                             int silverMineral2X = -1;
                             for (Recognition recognition : updatedRecognitions) {
-                                if(recognition.getTop() > 500) {
+                                if(recognition.getTop() > 500) { //fine tune this #
                                     if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                                         goldMineralX = (int) recognition.getLeft();
                                         goldMineralY = (int) recognition.getTop();
