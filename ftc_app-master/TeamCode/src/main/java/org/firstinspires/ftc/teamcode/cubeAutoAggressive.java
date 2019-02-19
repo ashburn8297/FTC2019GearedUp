@@ -87,7 +87,7 @@ public class cubeAutoAggressive extends LinearOpMode {
                     // the last time that call was made.
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
-                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        telemetry.addData("# Objects Detected", updatedRecognitions.size());
                         if (updatedRecognitions.size() >= 2) {
                             int goldMineralX = -1;
                             int goldMineralY = -1;
