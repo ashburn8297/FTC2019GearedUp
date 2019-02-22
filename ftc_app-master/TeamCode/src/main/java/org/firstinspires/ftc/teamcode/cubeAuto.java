@@ -51,7 +51,7 @@ public class cubeAuto extends LinearOpMode {
         sleep(2000);
 
         robot.turnByEncoder(0, .07, opModeIsActive(), 3.0, runtime);
-        robot.encoderDriveStraight(51, 5.0, opModeIsActive(), runtime);
+        robot.encoderDriveStraight(51, 5.0, .24, opModeIsActive(), runtime);
         sleep(1000);
         robot.turnByEncoder(40, .07, opModeIsActive(), 3.0, runtime);
 

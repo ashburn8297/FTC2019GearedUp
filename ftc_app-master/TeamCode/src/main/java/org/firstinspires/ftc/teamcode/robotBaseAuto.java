@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -58,8 +59,9 @@ public class robotBaseAuto
     public static final double  COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV_rev * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
     public static final double  DRIVE_SPEED = 0.24; //.23
-    public static final double  DRIVE_SPEED_CRATER = 0.05; //.1
-    public static final double  HEADING_THRESHOLD  = 2;
+    public static final double  DRIVE_SPEED_CRATER = 0.1; //.1
+    static final double     HEADING_THRESHOLD       = .75 ;
+
 
     public static final double  LEAD_SCREW_TURNS = 12.25; // Turns in the ADM lead screw
 
@@ -93,7 +95,9 @@ public class robotBaseAuto
 
         // Initialize direction of motors
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ADM.setDirection(DcMotor.Direction.FORWARD);
         inHorizontal.setDirection(DcMotor.Direction.REVERSE);
         inVertical.setDirection(DcMotor.Direction.REVERSE);
@@ -133,7 +137,7 @@ public class robotBaseAuto
         gyro = navxMicro;
     }
     //Auto Methods
-    public void encoderDriveStraight(double inches, double timeoutS, boolean opMode, ElapsedTime runtime) {
+    public void encoderDriveStraight(double inches, double timeoutS, double speed, boolean opMode, ElapsedTime runtime) {
         int newLeftTarget;
         int newRightTarget;
 
@@ -174,74 +178,39 @@ public class robotBaseAuto
             // Turn off RUN_TO_POSITION
             leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-            sleep(500);   // optional pause after each move
         }
 
     }
-    public void encoderDriveCrater(double inches, double timeoutS, boolean opMode, ElapsedTime runtime) {
-        int newLeftTarget;
-        int newRightTarget;
 
-        // Ensure that the opmode is still active
-        if (opMode) {
-
-            // Turn On RUN_TO_POSITION
-            leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            // Determine new target position, and pass to motor controller
-            newLeftTarget = leftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
-            newRightTarget = rightDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
-            leftDrive.setTargetPosition(newLeftTarget);
-            rightDrive.setTargetPosition(newRightTarget);
-
-            // reset the timeout time and start motion.
-            runtime.reset();
-            leftDrive.setPower(Math.abs(DRIVE_SPEED_CRATER));
-            rightDrive.setPower(Math.abs(DRIVE_SPEED_CRATER));
-
-            // keep looping while we are still active, and there is time left, and both motors are running.
-            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
-            // its target position, the motion will stop.  This is "safer" in the event that the robot will
-            // always end the motion as soon as possible.
-            // However, if you require that BOTH motors have finished their moves before the robot continues
-            // onto the next step, use (isBusy() || isBusy()) in the loop test.
-            while (opMode && (runtime.seconds() < timeoutS) && (leftDrive.isBusy() || rightDrive.isBusy())) {
-
-            }
-            // Turn off RUN_TO_POSITION
-            brake();
-
-            leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-            sleep(500);   // optional pause after each move
-        }
-    }
 
 
         public void turnByGyro(double targetAngle, double speed, boolean opMode, double timeoutS, ElapsedTime runtime) {
         runtime.reset();
+            double   error ;
+            double   steer ;
+            double leftSpeed;
+            double rightSpeed;
+            double PCoeff = .015;
         while(opMode && runtime.seconds() <timeoutS){
-            float CurAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-
-            if ((CurAngle >= (targetAngle - (HEADING_THRESHOLD / 2))) && (CurAngle <= (targetAngle + (HEADING_THRESHOLD / 2)))) {
-                rightDrive.setPower(0);
-                leftDrive.setPower(0);
+            double CurAngle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            error = targetAngle - CurAngle;
+            if (Math.abs(error) <= HEADING_THRESHOLD) {
+                leftSpeed  = 0.0;
+                rightSpeed = 0.0;
                 opMode = false;
             }
-            else if(CurAngle<targetAngle){
-                rightDrive.setPower(-speed);
-                leftDrive.setPower(speed);
+            else {
+                steer = Range.clip(error * PCoeff, -1, 1);
+                rightSpeed  = -speed * steer;
+                leftSpeed   = -rightSpeed;
             }
-            else if(CurAngle>targetAngle){
-                rightDrive.setPower(speed);
-                leftDrive.setPower(-speed);
-            }
+            leftDrive.setPower(leftSpeed);
+            rightDrive.setPower(rightSpeed);
         }
         brake();
     }
+
+
 
     public void turnByEncoder(double targetAngle, double speed, boolean opMode, double timeoutS, ElapsedTime runtime){
         int newLeftTarget;
