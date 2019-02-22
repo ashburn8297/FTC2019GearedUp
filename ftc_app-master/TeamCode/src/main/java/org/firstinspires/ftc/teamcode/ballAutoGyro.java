@@ -182,11 +182,6 @@ public class ballAutoGyro extends LinearOpMode {
             sleep(1000);
             robot.marker.setPosition(robot.markerMid);
         }
-        robot.turnByGyro(135, .15, opModeIsActive(), 3.0, runtime);
-        robot.encoderDriveStraight(-60, 5.0, .6, opModeIsActive(), runtime);
-        while(Math.abs(robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle) < 3){
-            robot.encoderDriveStraight(-4, 1.0, .1, opModeIsActive(), runtime);
-        }
 
     }
     private void initVuforia () {

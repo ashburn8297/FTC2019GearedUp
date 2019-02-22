@@ -144,7 +144,9 @@ public class cubeAutoGyro extends LinearOpMode {
         telemetry.addData("Index 1", freq[1]);
         telemetry.addData("Index 2", freq[2]);
         telemetry.update();
-
+        /**
+         * Speed #'s need to be fixed up. Before all were .24, now new numbers take effect
+         */
         if (opModeIsActive()) {
             robot.encoderDriveStraight(4, 2.0, .03,opModeIsActive(), runtime);
         }
@@ -178,16 +180,17 @@ public class cubeAutoGyro extends LinearOpMode {
         robot.encoderDriveStraight(4, 1.0, .05, opModeIsActive(), runtime);
         robot.turnByGyro(-48, .15, opModeIsActive(), 3.0, runtime);
         robot.encoderDriveStraight(60, 4.0, .5, opModeIsActive(), runtime);
+
         if (opModeIsActive()) {
             robot.marker.setPosition(robot.markerOut);
             sleep(1000);
             robot.marker.setPosition(robot.markerMid);
         }
         robot.turnByGyro(-42, .2, opModeIsActive(), .5, runtime);
+        robot.encoderDriveStraight(-60, 4.0, .7, opModeIsActive(), runtime);
 
         while(Math.abs(robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle) < 3){
-            robot.leftDrive.setPower(-.75);
-            robot.rightDrive.setPower(-.75);
+            robot.encoderDriveStraight(-5, 1.0, .1, opModeIsActive(), runtime);
         }
     }
     private void initVuforia () {
