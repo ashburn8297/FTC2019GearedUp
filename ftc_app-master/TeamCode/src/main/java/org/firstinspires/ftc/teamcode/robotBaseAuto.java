@@ -95,9 +95,7 @@ public class robotBaseAuto
 
         // Initialize direction of motors
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ADM.setDirection(DcMotor.Direction.FORWARD);
         inHorizontal.setDirection(DcMotor.Direction.REVERSE);
         inVertical.setDirection(DcMotor.Direction.REVERSE);
@@ -144,6 +142,9 @@ public class robotBaseAuto
         // Ensure that the opmode is still active
         if (opMode) {
 
+            rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
             // Turn On RUN_TO_POSITION
             leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -181,6 +182,56 @@ public class robotBaseAuto
         }
 
     }
+    public void encoderDriveRamp(double inches, double timeoutS, double speed, boolean opMode, ElapsedTime runtime) {
+        int newLeftTarget;
+        int newRightTarget;
+
+        // Ensure that the opmode is still active
+        if (opMode) {
+
+            // Turn On RUN_TO_POSITION
+            leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = leftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            newRightTarget = rightDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            leftDrive.setTargetPosition(newLeftTarget);
+            rightDrive.setTargetPosition(newRightTarget);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            leftDrive.setPower(Math.abs(speed));
+            rightDrive.setPower(Math.abs(speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opMode && (runtime.seconds() < timeoutS) && (leftDrive.isBusy() || rightDrive.isBusy())) {
+                double curPos = Math.abs(leftDrive.getCurrentPosition());
+                double toGo = Math.abs(newLeftTarget) - curPos;
+                //0 to 560*50
+                double pct = toGo/newLeftTarget;
+                leftDrive.setPower(Math.abs(speed * pct) + .02);
+                rightDrive.setPower(Math.abs(speed * pct) + .02);
+            }
+
+            // Stop all motion;
+            brake();
+
+            leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            // Turn off RUN_TO_POSITION
+            leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+    }
+
 
     public void turnByGyro(double targetAngle, double speed, boolean opMode, double timeoutS, ElapsedTime runtime) {
         runtime.reset();

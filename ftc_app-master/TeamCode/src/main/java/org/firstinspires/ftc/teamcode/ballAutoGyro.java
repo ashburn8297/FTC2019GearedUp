@@ -143,45 +143,7 @@ public class ballAutoGyro extends LinearOpMode {
         telemetry.addData("Index 2", freq[2]);
         telemetry.update();
 
-        if (opModeIsActive()) {
-            robot.encoderDriveStraight(4, 2.0, .03,opModeIsActive(), runtime);
-        }
-        if(maxIndex == 0) {
-            robot.turnByGyro(30, .15, opModeIsActive(), 2.0, runtime);
-            robot.encoderDriveStraight(25, 4.5, .05, opModeIsActive(), runtime);
-        }
-        else if(maxIndex == 1){
-            robot.turnByGyro(0, .15, opModeIsActive(), 2.0, runtime);
-            robot.encoderDriveStraight(20, 4.0, .05, opModeIsActive(), runtime);
-        }
-        else if(maxIndex == 2){
-            robot.turnByGyro(-30, .15, opModeIsActive(), 2.0, runtime);
-            robot.encoderDriveStraight(25, 4.5, .05, opModeIsActive(), runtime);
-        }
-        robot.encoderDriveStraight(-9, 4.0, .05, opModeIsActive(), runtime);
-        robot.turnByGyro(90, .15, opModeIsActive(), 3.0, runtime);
 
-        if(maxIndex ==0) {
-            robot.encoderDriveStraight(36, 4.0, .2, opModeIsActive(), runtime);
-        }
-        if(maxIndex ==1 ) {
-            robot.encoderDriveStraight(40, 4.5, .22, opModeIsActive(), runtime);
-        }
-        if(maxIndex ==2) {
-            robot.encoderDriveStraight(44, 5.0, .24, opModeIsActive(), runtime);
-        }
-
-        robot.turnByGyro(-135, .22, opModeIsActive(), 3.0, runtime);
-        robot.encoderDriveStraight(-14, 2.0, .15, opModeIsActive(), runtime);
-        robot.encoderDriveStraight(4, 1.0, .05, opModeIsActive(), runtime);
-        robot.turnByGyro(132, .15, opModeIsActive(), 4.0, runtime);
-        robot.encoderDriveStraight(50, 5.0, .5, opModeIsActive(), runtime);
-        robot.turnByGyro(170, .2, opModeIsActive(), 3.0, runtime);
-        if (opModeIsActive()) {
-            robot.marker.setPosition(robot.markerOut);
-            sleep(1000);
-            robot.marker.setPosition(robot.markerMid);
-        }
 
     }
     private void initVuforia () {
