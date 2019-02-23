@@ -141,12 +141,14 @@ public class cubeAutoGyro extends LinearOpMode {
         telemetry.addData("Center", freq[1]);
         telemetry.addData("Right", freq[2]);
         telemetry.update();
+        
         /**
          * Speed #'s need to be fixed up. Before all were .24, now new numbers take effect
          */
         if (opModeIsActive()) {
             robot.encoderDriveStraight(4, 1.0, .20,opModeIsActive(), runtime);
         }
+
         if(maxIndex == 0) {
             robot.turnByGyro(35, .18, opModeIsActive(), 1.25, runtime);
             robot.encoderDriveStraight(25, 1.5, .25, opModeIsActive(), runtime);
@@ -158,6 +160,7 @@ public class cubeAutoGyro extends LinearOpMode {
             robot.turnByGyro(-35, .18, opModeIsActive(), 1.25, runtime);
             robot.encoderDriveStraight(25, 1.5, .25, opModeIsActive(), runtime);
         }
+
         robot.encoderDriveStraight(-10, 1.5, .2, opModeIsActive(), runtime);
         robot.turnByGyro(90, .15, opModeIsActive(), 2.0, runtime);
 

@@ -85,7 +85,7 @@ public class ballAutoGyro extends LinearOpMode {
                 tfod.activate();
             }
 
-            while (opModeIsActive()&&runtime.seconds()<3) {
+            while (opModeIsActive()&&runtime.seconds()<1.5) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -94,14 +94,12 @@ public class ballAutoGyro extends LinearOpMode {
                         telemetry.addData("# Object Detected", updatedRecognitions.size());
                         if (updatedRecognitions.size() >= 2) {
                             int goldMineralX = -1;
-                            int goldMineralY = -1;
                             int silverMineral1X = -1;
                             int silverMineral2X = -1;
                             for (Recognition recognition : updatedRecognitions) {
                                 if(recognition.getTop() > 280) {
                                     if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                                         goldMineralX = (int) recognition.getLeft();
-                                        goldMineralY = (int) recognition.getTop();
                                     } else if (silverMineral1X == -1) {
                                         silverMineral1X = (int) recognition.getLeft();
                                     } else {
@@ -119,7 +117,6 @@ public class ballAutoGyro extends LinearOpMode {
                                 freq[1]++;
                             }
                             telemetry.addData("Gold", goldMineralX);
-                            telemetry.addData("Gold Y", goldMineralY);
                             telemetry.addData("S1", silverMineral1X);
                             telemetry.addData("S2", silverMineral2X);
                         }
@@ -137,14 +134,68 @@ public class ballAutoGyro extends LinearOpMode {
         if (tfod != null) {
             tfod.shutdown();
         }
+
         telemetry.addData("Location", maxIndex);
-        telemetry.addData("Index 0", freq[0]);
-        telemetry.addData("Index 1", freq[1]);
-        telemetry.addData("Index 2", freq[2]);
+        telemetry.addData("Left", freq[0]);
+        telemetry.addData("Center", freq[1]);
+        telemetry.addData("Right", freq[2]);
         telemetry.update();
 
+        /**
+         * Speed #'s need to be fixed up. Before all were .24, now new numbers take effect
+         */
+        if (opModeIsActive()) {
+            robot.encoderDriveStraight(4, 1.0, .20,opModeIsActive(), runtime);
+        }
 
+        if(maxIndex == 0) {
+            robot.turnByGyro(35, .18, opModeIsActive(), 1.25, runtime);
+            robot.encoderDriveStraight(25, 1.5, .25, opModeIsActive(), runtime);
+        }
+        else if(maxIndex == 1){
+            robot.encoderDriveStraight(20, 1.0, .25, opModeIsActive(), runtime);
+        }
+        else if(maxIndex == 2){
+            robot.turnByGyro(-35, .18, opModeIsActive(), 1.25, runtime);
+            robot.encoderDriveStraight(25, 1.5, .25, opModeIsActive(), runtime);
+        }
 
+        robot.encoderDriveStraight(-10, 1.5, .2, opModeIsActive(), runtime);
+        robot.turnByGyro(90, .15, opModeIsActive(), 2.0, runtime);
+
+        if(maxIndex ==0) {
+            robot.encoderDriveStraight(25, 2.5, .23, opModeIsActive(), runtime);
+        }
+        if(maxIndex ==1 ) {
+            robot.encoderDriveStraight(30, 2.5, .23, opModeIsActive(), runtime);
+        }
+        if(maxIndex ==2) {
+            robot.encoderDriveStraight(38, 2.5, .26, opModeIsActive(), runtime);
+        }
+
+        robot.turnByGyro(-135, .27, opModeIsActive(), 3.0, runtime);
+        robot.encoderDriveStraight(-22, 2.0, .25, opModeIsActive(), runtime);
+        robot.encoderDriveStraight(4, .5, .15, opModeIsActive(), runtime);
+
+        //turn back towards crater
+
+        //ramp to depot
+
+        if (opModeIsActive()) {
+            robot.marker.setPosition(robot.markerOut);
+            sleep(700);
+            robot.marker.setPosition(robot.markerMid);
+        }
+
+        //turn to free marker
+        //ramp to depot
+
+        runtime.reset();
+        while(Math.abs(robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle)<3 && (runtime.seconds()<2) && opModeIsActive()){
+            robot.leftDrive.setPower(-.1);
+            robot.rightDrive.setPower(-.1);
+        }
+        robot.brake();
     }
     private void initVuforia () {
         /*
