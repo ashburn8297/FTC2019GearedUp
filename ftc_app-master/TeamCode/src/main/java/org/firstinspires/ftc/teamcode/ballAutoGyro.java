@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -61,10 +62,11 @@ public class ballAutoGyro extends LinearOpMode {
             sleep(50);
         }
         telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         telemetry.clear(); telemetry.update();
 
         waitForStart();
-
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_RAINBOW_PALETTE);
         //Lower Lift
         if (opModeIsActive()) {
             robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
@@ -79,6 +81,7 @@ public class ballAutoGyro extends LinearOpMode {
         }
 
         runtime.reset();
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
         if (opModeIsActive()) {
             /** Activate Tensor Flow Object Detection. */
             if (tfod != null) {
@@ -119,6 +122,7 @@ public class ballAutoGyro extends LinearOpMode {
                             telemetry.addData("Gold", goldMineralX);
                             telemetry.addData("S1", silverMineral1X);
                             telemetry.addData("S2", silverMineral2X);
+                            robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_BLUE);
                         }
                         telemetry.update();
                     }
@@ -135,6 +139,7 @@ public class ballAutoGyro extends LinearOpMode {
             tfod.shutdown();
         }
 
+
         telemetry.addData("Location", maxIndex);
         telemetry.addData("Left", freq[0]);
         telemetry.addData("Center", freq[1]);
@@ -144,6 +149,7 @@ public class ballAutoGyro extends LinearOpMode {
         /**
          * Speed #'s need to be fixed up. Before all were .24, now new numbers take effect
          */
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GOLD);
         if (opModeIsActive()) {
             robot.encoderDriveStraight(4, 1.0, .20,opModeIsActive(), runtime);
         }
@@ -173,24 +179,30 @@ public class ballAutoGyro extends LinearOpMode {
             robot.encoderDriveStraight(38, 2.5, .26, opModeIsActive(), runtime);
         }
 
-        robot.turnByGyro(-135, .27, opModeIsActive(), 3.0, runtime);
-        robot.encoderDriveStraight(-22, 2.0, .25, opModeIsActive(), runtime);
-        robot.encoderDriveStraight(4, .5, .15, opModeIsActive(), runtime);
+        robot.turnByGyro(-135, .22, opModeIsActive(), 3.0, runtime);
+        robot.encoderDriveStraight(-22, 1.5, .25, opModeIsActive(), runtime);
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
+        robot.encoderDriveStraight(8, .5, .15, opModeIsActive(), runtime);
+        robot.turnByEncoder(-90, .15, opModeIsActive(), 3.0, runtime);//figure out this turn
 
-        //turn back towards crater
+        robot.encoderDriveRamp(53, 2.5, .45, opModeIsActive(), runtime);
 
-        //ramp to depot
+        robot.turnByGyro(170, .3, opModeIsActive(), 1.0, runtime);
 
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
         if (opModeIsActive()) {
             robot.marker.setPosition(robot.markerOut);
             sleep(700);
             robot.marker.setPosition(robot.markerMid);
         }
 
-        //turn to free marker
-        //ramp to depot
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
+
+        robot.turnByGyro(138, .25, opModeIsActive(), 2.0, runtime);
+        robot.encoderDriveRamp(-65, 3.0, .45, opModeIsActive(), runtime);
 
         runtime.reset();
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
         while(Math.abs(robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle)<3 && (runtime.seconds()<2) && opModeIsActive()){
             robot.leftDrive.setPower(-.1);
             robot.rightDrive.setPower(-.1);

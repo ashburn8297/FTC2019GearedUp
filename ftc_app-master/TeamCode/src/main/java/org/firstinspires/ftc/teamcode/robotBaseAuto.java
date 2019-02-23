@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -42,6 +43,7 @@ public class robotBaseAuto
     public CRServo intake                   = null; //intake
     public DigitalChannel hall              = null; //
     public DigitalChannel vertHall          = null; //vertHall
+    public RevBlinkinLedDriver blinkin      = null;
 
     IntegratingGyroscope gyro;
 
@@ -129,7 +131,7 @@ public class robotBaseAuto
         intakeGate = hwMap.get(Servo.class, "intake_pitch");
         intakeGate.setDirection(Servo.Direction.FORWARD);
 
-
+        blinkin = hwMap.get(RevBlinkinLedDriver.class, "blinkin");
 
         navxMicro = hwMap.get(NavxMicroNavigationSensor.class, "navx");
         gyro = navxMicro;

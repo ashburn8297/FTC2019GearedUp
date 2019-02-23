@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -61,10 +62,12 @@ public class cubeAutoGyro extends LinearOpMode {
             sleep(50);
         }
         telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         telemetry.clear(); telemetry.update();
 
         waitForStart();
 
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_RAINBOW_PALETTE);
         //Lower Lift
         if (opModeIsActive()) {
             robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
@@ -79,6 +82,7 @@ public class cubeAutoGyro extends LinearOpMode {
         }
 
         runtime.reset();
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
         if (opModeIsActive()) {
             /** Activate Tensor Flow Object Detection. */
             if (tfod != null) {
@@ -119,6 +123,7 @@ public class cubeAutoGyro extends LinearOpMode {
                             telemetry.addData("Gold", goldMineralX);
                             telemetry.addData("S1", silverMineral1X);
                             telemetry.addData("S2", silverMineral2X);
+                            robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_BLUE);
                         }
                         telemetry.update();
                     }
@@ -145,6 +150,7 @@ public class cubeAutoGyro extends LinearOpMode {
         /**
          * Speed #'s need to be fixed up. Before all were .24, now new numbers take effect
          */
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GOLD);
         if (opModeIsActive()) {
             robot.encoderDriveStraight(4, 1.0, .20,opModeIsActive(), runtime);
         }
@@ -174,21 +180,25 @@ public class cubeAutoGyro extends LinearOpMode {
             robot.encoderDriveStraight(38, 2.5, .26, opModeIsActive(), runtime);
         }
 
-        robot.turnByGyro(-135, .27, opModeIsActive(), 3.0, runtime);
+        robot.turnByGyro(-135, .23, opModeIsActive(), 3.0, runtime);
         robot.encoderDriveStraight(-22, 2.0, .25, opModeIsActive(), runtime);
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
         robot.encoderDriveStraight(4, .5, .15, opModeIsActive(), runtime);
         robot.turnByGyro(-45, .15, opModeIsActive(), 2.0, runtime);
         robot.encoderDriveRamp(53, 3.0, .45, opModeIsActive(), runtime);
 
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
         if (opModeIsActive()) {
             robot.marker.setPosition(robot.markerOut);
             sleep(700);
             robot.marker.setPosition(robot.markerMid);
         }
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
         robot.turnByGyro(-55, .40, opModeIsActive(), 1.0, runtime);
         robot.encoderDriveRamp(-65, 3.5, .45, opModeIsActive(), runtime);
         //some sort of loop to check and see if robot has collided with crater wall
         runtime.reset();
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
         while(Math.abs(robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle)<3 && (runtime.seconds()<2) && opModeIsActive()){
             robot.leftDrive.setPower(-.1);
             robot.rightDrive.setPower(-.1);

@@ -27,6 +27,7 @@ public class teleopRedo extends OpMode {
     public DcMotor inVertical               = null; //intake_veritcal
     public DcMotor inHorizontal             = null; //intake_horizontal
     public DigitalChannel vertHall          = null; //vertHall
+    public RevBlinkinLedDriver blinkin      = null;
 
     int direction = -1;
     double leftPower = 0.0;
@@ -56,6 +57,7 @@ public class teleopRedo extends OpMode {
     public static final double markerOut = .8;
 
     public static final double ticksPerDegree = 1800/360;
+    public ElapsedTime runtime = new ElapsedTime();
     @Override
     public void init() {
         leftDrive = hardwareMap.get(DcMotor.class, "left_drive");
@@ -98,7 +100,7 @@ public class teleopRedo extends OpMode {
 
         vertHall = hardwareMap.get(DigitalChannel.class, "vertHall");
 
-
+        blinkin = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
     }
 
     public void start() {
@@ -112,6 +114,7 @@ public class teleopRedo extends OpMode {
 
         inVertical.setPower(0);
         //traverse.setPosition(minTraverse);
+        runtime.reset();
 
     }
 
@@ -189,9 +192,9 @@ public class teleopRedo extends OpMode {
             intakeGate.setPosition(-1.0);
 
         if(gamepad2.right_trigger > 0 || gamepad2.right_bumper)
-            intake.setPower(.3);
+            intake.setPower(.8);
         else if(gamepad2.left_trigger > 0 || gamepad2.left_bumper)
-            intake.setPower(-.3);
+            intake.setPower(-.8);
         else
             intake.setPower(0.0);
 
@@ -220,6 +223,13 @@ public class teleopRedo extends OpMode {
         telemetry.addData("Left Stick",gamepad1.left_stick_y);
         telemetry.addData("Right Drive",rightDrive.getCurrentPosition());
         telemetry.addData("Left Drive",leftDrive.getCurrentPosition());*/
+
+        if(runtime.seconds()<100){
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+        }
+        else{
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
+        }
 
     }
     public static double getWheelPower(double in){
