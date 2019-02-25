@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -28,6 +30,7 @@ public class ballAutoGyro extends LinearOpMode {
     int maxIndex = 0;
     int[] freq = new int[3];
     int max = 0;
+    private boolean rateFound = false;
 
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
@@ -37,6 +40,14 @@ public class ballAutoGyro extends LinearOpMode {
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
     public void runOpMode() {
+
+        int mega   = hardwareMap.appContext.getResources().getIdentifier("megalovania",   "raw", hardwareMap.appContext.getPackageName());
+
+
+        boolean megaFound = false;
+        if (mega != 0)
+            megaFound  = SoundPlayer.getInstance().preload(hardwareMap.appContext, mega);
+
         robot.init(hardwareMap);
         robot.traverse.setPosition(midTraverseRight);
         robot.ADM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -67,18 +78,21 @@ public class ballAutoGyro extends LinearOpMode {
 
         waitForStart();
         robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_RAINBOW_PALETTE);
+        if (megaFound) {
+            SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, mega);
+        }
         //Lower Lift
         if (opModeIsActive()) {
             robot.ADM.setTargetPosition((int) (robot.LEAD_SCREW_TURNS * robot.COUNTS_PER_MOTOR_REV_rev) - 100); //tuner
-            robot.ADM.setPower(.95);
+            robot.ADM.setPower(1.0);
         }
 
         sleep(3000);
-        robot.ADM.setPower(.05); //To stop jittering
-
         if(opModeIsActive()){
             robot.traverse.setPosition(robot.maxTraverse);
         }
+        robot.ADM.setPower(.05); //To stop jittering
+
 
         runtime.reset();
         robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
@@ -88,7 +102,7 @@ public class ballAutoGyro extends LinearOpMode {
                 tfod.activate();
             }
 
-            while (opModeIsActive()&&runtime.seconds()<1.5) {
+            while (opModeIsActive()&&runtime.seconds()<1.75) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -180,30 +194,34 @@ public class ballAutoGyro extends LinearOpMode {
         }
 
         robot.turnByGyro(-135, .22, opModeIsActive(), 3.0, runtime);
-        robot.encoderDriveStraight(-22, 1.5, .25, opModeIsActive(), runtime);
-        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
-        robot.encoderDriveStraight(8, .5, .15, opModeIsActive(), runtime);
-        robot.turnByEncoder(-90, .15, opModeIsActive(), 3.0, runtime);//figure out this turn
 
-        robot.encoderDriveRamp(53, 2.5, .45, opModeIsActive(), runtime);
+        //if this fails
+        robot.encoderDriveRamp(-24, 1.5, .6, opModeIsActive(), runtime);
+
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
+        robot.encoderDriveStraight(4, 1.5, .15, opModeIsActive(), runtime);
+        robot.turnByEncoder(-80, .08, opModeIsActive(), 3.0, runtime);//figure out this turn
+
+        robot.encoderDriveRamp(53, 2.5, .52, opModeIsActive(), runtime);
+
 
         robot.turnByGyro(170, .3, opModeIsActive(), 1.0, runtime);
 
         robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
         if (opModeIsActive()) {
             robot.marker.setPosition(robot.markerOut);
-            sleep(700);
+            sleep(500);
             robot.marker.setPosition(robot.markerMid);
         }
 
         robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
 
-        robot.turnByGyro(138, .25, opModeIsActive(), 2.0, runtime);
-        robot.encoderDriveRamp(-65, 3.0, .45, opModeIsActive(), runtime);
+        robot.turnByGyro(145, .25, opModeIsActive(), 1.0, runtime);
+        robot.encoderDriveRamp(-65, 3.0, .52, opModeIsActive(), runtime);
 
         runtime.reset();
         robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
-        while(Math.abs(robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle)<3 && (runtime.seconds()<2) && opModeIsActive()){
+        while(Math.abs(robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle)<3 && (runtime.seconds()<1) && opModeIsActive()){
             robot.leftDrive.setPower(-.1);
             robot.rightDrive.setPower(-.1);
         }
@@ -230,7 +248,7 @@ public class ballAutoGyro extends LinearOpMode {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minimumConfidence = .6;
+        tfodParameters.minimumConfidence = .4;
 
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);

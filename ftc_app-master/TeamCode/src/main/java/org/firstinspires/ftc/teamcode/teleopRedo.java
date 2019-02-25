@@ -106,8 +106,6 @@ public class teleopRedo extends OpMode {
     public void start() {
         if(inVertical.getCurrentPosition()>targetPos) {
             while ((inVertical.getCurrentPosition() > targetPos)) {
-                telemetry.addData("EncoderPos", inVertical.getCurrentPosition());
-                telemetry.update();
                 inVertical.setPower(0.03);
             }
         }
@@ -198,37 +196,36 @@ public class teleopRedo extends OpMode {
         else
             intake.setPower(0.0);
 
-        /*
-        while (vertHall.getState() && gamepad2.x) {
-            inVertical.setPower(-0.03);
-            found = true;
+
+        if(vertHall.getState() && gamepad2.x){
+            inVertical.setPower(-.03);
         }
-        if(found && !vertHall.getState()){
-            sleep(340);
+        else if (!vertHall.getState() && gamepad2.x ){
             inVertical.setPower(0);
-            found = false;
-        }
-        */
-
-
-
-        inVertical.setPower(-gamepad2.right_stick_y * 0.075);
-        inHorizontal.setPower(gamepad2.left_stick_y);
-
-        /*telemetry.addData("Arm", inVertical.getCurrentPosition());
-        telemetry.addData("VertHAll", vertHall.getState());
-        //Set motor power to stick input, directionally scale
-
-        telemetry.addData("Right Stick",gamepad1.right_stick_y);
-        telemetry.addData("Left Stick",gamepad1.left_stick_y);
-        telemetry.addData("Right Drive",rightDrive.getCurrentPosition());
-        telemetry.addData("Left Drive",leftDrive.getCurrentPosition());*/
-
-        if(runtime.seconds()<100){
-            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         }
         else{
+            inVertical.setPower(-gamepad2.right_stick_y * 0.075);
+        }
+
+
+        inHorizontal.setPower(gamepad2.left_stick_y);
+
+
+
+        if(runtime.seconds()<75){
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+        }
+        else if (runtime.seconds() < 90){
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+        }
+        else if (runtime.seconds() < 105){
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+        }
+        else if (runtime.seconds() < 120){
             blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
+        }
+        else{
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.CONFETTI);
         }
 
     }

@@ -87,7 +87,7 @@ public class ConceptSoundsASJava extends LinearOpMode {
     public void runOpMode() {
 
         // Determine Resource IDs for sounds built into the RC application.
-        int silverSoundID = hardwareMap.appContext.getResources().getIdentifier("silver", "raw", hardwareMap.appContext.getPackageName());
+        int silverSoundID = hardwareMap.appContext.getResources().getIdentifier("megalovania", "raw", hardwareMap.appContext.getPackageName());
         int goldSoundID   = hardwareMap.appContext.getResources().getIdentifier("gold",   "raw", hardwareMap.appContext.getPackageName());
 
         // Determine if sound resources are found.
