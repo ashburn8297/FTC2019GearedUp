@@ -207,7 +207,7 @@ public class ballAutoGyro extends LinearOpMode {
 
         robot.turnByGyro(170, .3, opModeIsActive(), 1.0, runtime);
 
-        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.DARK_RED);
         if (opModeIsActive()) {
             robot.marker.setPosition(robot.markerOut);
             sleep(500);

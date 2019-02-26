@@ -130,7 +130,7 @@ public class ImageRecognitionTest extends LinearOpMode {
         telemetry.addData("Index 1", freq[1]);
         telemetry.addData("Index 2", freq[2]);
         telemetry.update();
-        sleep(10000);
+        sleep(5000);
     }
     private void initVuforia () {
         /*

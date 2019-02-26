@@ -209,7 +209,7 @@ public class cubeAutoGyro extends LinearOpMode {
         robot.turnByGyro(-45, .15, opModeIsActive(), 2.0, runtime);
         robot.encoderDriveRamp(53, 2.5, .52, opModeIsActive(), runtime);
 
-        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.DARK_RED);
         if (opModeIsActive()) {
             robot.marker.setPosition(robot.markerOut);
             sleep(500);
