@@ -114,7 +114,7 @@ public class ballAutoGyro extends LinearOpMode {
                             int silverMineral1X = -1;
                             int silverMineral2X = -1;
                             for (Recognition recognition : updatedRecognitions) {
-                                if(recognition.getTop() > 280) {
+                                if(recognition.getTop() > 280 && recognition.getTop() <  425) {
                                     if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                                         goldMineralX = (int) recognition.getLeft();
                                     } else if (silverMineral1X == -1) {
@@ -193,10 +193,10 @@ public class ballAutoGyro extends LinearOpMode {
             robot.encoderDriveStraight(38, 2.5, .26, opModeIsActive(), runtime);
         }
 
-        robot.turnByGyro(-135, .22, opModeIsActive(), 3.0, runtime);
+        robot.turnByGyro(-135, .24, opModeIsActive(), 3.0, runtime);
 
         //if this fails
-        robot.encoderDriveRamp(-24, 1.5, .6, opModeIsActive(), runtime);
+        robot.encoderDriveRamp(-26, 1.5, .6, opModeIsActive(), runtime);
 
         robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
         robot.encoderDriveStraight(4, 1.5, .15, opModeIsActive(), runtime);
@@ -222,8 +222,8 @@ public class ballAutoGyro extends LinearOpMode {
         runtime.reset();
         robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_WHITE);
         while(Math.abs(robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle)<3 && (runtime.seconds()<1) && opModeIsActive()){
-            robot.leftDrive.setPower(-.1);
-            robot.rightDrive.setPower(-.1);
+            robot.leftDrive.setPower(-.15);
+            robot.rightDrive.setPower(-.15);
         }
         robot.brake();
     }

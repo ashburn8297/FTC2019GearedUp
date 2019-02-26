@@ -73,7 +73,7 @@ public class ImageRecognitionTest extends LinearOpMode {
                 tfod.activate();
             }
 
-            while (opModeIsActive()&&runtime.seconds()<15) {
+            while (opModeIsActive()&&runtime.seconds()<25) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -86,7 +86,7 @@ public class ImageRecognitionTest extends LinearOpMode {
                             int silverMineral1X = -1;
                             int silverMineral2X = -1;
                             for (Recognition recognition : updatedRecognitions) {
-                                if(recognition.getTop() > 280) { //fine tune this #
+                                if(recognition.getTop() > 280 && recognition.getTop() <  425) { //fine tune this #
                                     if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                                         goldMineralX = (int) recognition.getLeft();
                                         goldMineralY = (int) recognition.getTop();

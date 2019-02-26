@@ -184,16 +184,20 @@ public class teleopRedo extends OpMode {
             sleep(250);
         }
 
-        if(gamepad2.a)
+        if(gamepad2.a) {
             intakeGate.setPosition(1.0);
-        else
-            intakeGate.setPosition(-1.0);
-
-        if(gamepad2.right_trigger > 0 || gamepad2.right_bumper)
             intake.setPower(.8);
-        else if(gamepad2.left_trigger > 0 || gamepad2.left_bumper)
+        }
+        else {
+            intakeGate.setPosition(-1.0);
+            intake.setPower(0.0);
+        }
+
+        if((gamepad2.right_trigger > 0 || gamepad2.right_bumper)&& !gamepad2.a)
+            intake.setPower(.8);
+        else if((gamepad2.left_trigger > 0 || gamepad2.left_bumper) && !gamepad2.a)
             intake.setPower(-.8);
-        else
+        else if(!gamepad2.a)
             intake.setPower(0.0);
 
 
