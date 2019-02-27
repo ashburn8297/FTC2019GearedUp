@@ -196,7 +196,7 @@ public class ballAutoGyro extends LinearOpMode {
         robot.turnByGyro(-135, .24, opModeIsActive(), 3.0, runtime);
 
         //if this fails
-        robot.encoderDriveRamp(-26, 1.5, .6, opModeIsActive(), runtime);
+        robot.encoderDriveRamp(-26, 1.75, .6, opModeIsActive(), runtime);
 
         robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
         robot.encoderDriveStraight(4, 1.5, .15, opModeIsActive(), runtime);
