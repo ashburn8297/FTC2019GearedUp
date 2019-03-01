@@ -219,8 +219,11 @@ public class teleopRedo extends OpMode {
         if(runtime.seconds()<75){
             blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         }
-        else if (runtime.seconds() < 90){
+        else if (runtime.seconds() < 85){
             blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+        }
+        else if (runtime.seconds() < 90){
+            blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
         }
         else if (runtime.seconds() < 105){
             blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
