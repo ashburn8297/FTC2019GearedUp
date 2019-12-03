@@ -165,7 +165,7 @@ public class cubeAutoGyro extends LinearOpMode {
         telemetry.addData("Center", freq[1]);
         telemetry.addData("Right", freq[2]);
         telemetry.update();
-        
+
         /**
          * Speed #'s need to be fixed up. Before all were .24, now new numbers take effect
          */
@@ -249,7 +249,6 @@ public class cubeAutoGyro extends LinearOpMode {
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfodParameters.minimumConfidence = .4;
-
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
